@@ -1,0 +1,172 @@
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Body */
+body {
+  background-color: #f0f0f0; /* Light gray background for contrast */
+  color: #333; /* Dark text color for readability */
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  background-color: #1976d2; /* Police blue */
+  color: #fff; /* White text */
+  padding: 20px 0;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+}
+
+/* Button Styling (for actions like Raise Complaint, View Status) */
+button {
+  background-color: #f44336; /* Red */
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+  background-color: #d32f2f; /* Darker red for hover effect */
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(1);
+}
+
+/* Link Styling */
+a {
+  color: #1976d2; /* Blue links */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Section */
+section {
+  padding: 40px 20px;
+  background-color: #fff;
+  margin: 20px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+}
+
+/* Footer */
+footer {
+  background-color: #333;
+  color: #fff;
+  padding: 20px 0;
+  text-align: center;
+}
+
+footer p {
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+/* Police Siren Effect for Animations */
+@keyframes sirenEffect {
+  0%, 100% {
+    background-color: #1976d2; /* Blue */
+    color: #fff;
+  }
+  50% {
+    background-color: #f44336; /* Red */
+    color: #fff;
+  }
+}
+
+.siren-button {
+  animation: sirenEffect 1.5s infinite;
+}
+
+/* Card Components */
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  color: #1976d2; /* Blue headings */
+}
+
+.card p {
+  color: #555;
+}
+
+/* Police Badge Icon (for siren-like emphasis) */
+.siren-icon {
+  font-size: 3rem;
+  color: #f44336; /* Red */
+  animation: sirenEffect 1.5s infinite;
+}
+
+/* Container for center alignment */
+.container {
+  width: 90%;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+/* Form Inputs */
+input, select, textarea {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #1976d2; /* Focused blue border */
+}
+
+/* Alerts or Notifications */
+.alert {
+  background-color: #f44336; /* Red for urgency */
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.alert.success {
+  background-color: #388e3c; /* Green success color */
+}
+
+.alert.info {
+  background-color: #1976d2; /* Blue info color */
+}
