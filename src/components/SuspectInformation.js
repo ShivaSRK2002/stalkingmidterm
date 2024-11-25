@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, InputAdornment } from '@mui/material';
+import { Box, Typography, TextField, InputAdornment, Grid, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Tooltip } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import HomeIcon from '@mui/icons-material/Home';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -14,99 +14,128 @@ const AccusedInformation = ({ updateFormData, formData, setStepValid }) => {
 
   const validateFields = () => {
     const newErrors = {};
-    
-    // Validate Accused's Name
+
     if (!individualDetails.accusedName) {
       newErrors.accusedName = 'Accused name is required';
     }
 
-    // Validate Accused's Location
     if (!individualDetails.accusedLocation) {
       newErrors.accusedLocation = 'Accused location is required';
     }
 
-    // Validate Relation to Complainant
     if (!individualDetails.relation) {
       newErrors.relation = 'Relation to complainant is required';
     }
 
+    // Validate Gender
+    if (!individualDetails.accusedgender) {
+      newErrors.accusedgender = 'Gender is required';
+    }
+
     setErrors(newErrors);
 
-    // Return whether the form is valid
     return Object.keys(newErrors).length === 0;
   };
 
-  // Update the parent component with form validity
   useEffect(() => {
     setStepValid(validateFields());
   }, [individualDetails, setStepValid]);
 
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
       <Typography variant="h5" gutterBottom>
         Accused's Details (if known)
       </Typography>
 
-      {/* Accused Name */}
-      <TextField
-        label="Accused's Name"
-        value={individualDetails.accusedName || ''}
-        onChange={(e) => handleChange('accusedName', e.target.value)}
-        fullWidth
-        margin="normal"
-        required
-        error={!!errors.accusedName}
-        helperText={errors.accusedName}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <PersonIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
+      {/* Form Table */}
+      <Grid container spacing={2}>
+        {/* Accused Name */}
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <Tooltip title="Please enter the full name of the accused" arrow>
+              <TextField
+                label="Accused's Name"
+                value={individualDetails.accusedName || ''}
+                onChange={(e) => handleChange('accusedName', e.target.value)}
+                margin="normal"
+                required
+                helperText={errors.accusedName}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Tooltip>
+          </FormControl>
+        </Grid>
 
-      {/* Accused Address/Location */}
-      <TextField
-        label="Accused's Address/Location"
-        value={individualDetails.accusedLocation || ''}
-        onChange={(e) => handleChange('accusedLocation', e.target.value)}
-        fullWidth
-        margin="normal"
-        multiline
-        rows={3}
-        required
-        error={!!errors.accusedLocation}
-        helperText={errors.accusedLocation}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <HomeIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
+        {/* Accused Address/Location */}
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <TextField
+              label="Accused's Address/Location"
+              value={individualDetails.accusedLocation || ''}
+              onChange={(e) => handleChange('accusedLocation', e.target.value)}
+              margin="normal"
+              multiline
+              rows={3}
+              required
+              helperText={errors.accusedLocation}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <HomeIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </FormControl>
+        </Grid>
 
-      {/* Description or Relation to Complainant */}
-      <TextField
-        label="Description or Relation to Complainant"
-        value={individualDetails.relation || ''}
-        onChange={(e) => handleChange('relation', e.target.value)}
-        fullWidth
-        margin="normal"
-        multiline
-        rows={3}
-        required
-        error={!!errors.relation}
-        helperText={errors.relation}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <DescriptionIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
+        {/* Description or Relation to Complainant */}
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <Tooltip title="Describe the relation or provide a description of the accused" arrow>
+              <TextField
+                label="Description or Relation to Complainant"
+                value={individualDetails.relation || ''}
+                onChange={(e) => handleChange('relation', e.target.value)}
+                margin="normal"
+                multiline
+                rows={3}
+                required
+                helperText={errors.relation}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <DescriptionIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Tooltip>
+          </FormControl>
+        </Grid>
+
+        {/* Gender selection */}
+        <Grid item xs={12}>
+          <FormControl component="fieldset" fullWidth margin="normal" required>
+            <FormLabel component="legend">Gender</FormLabel>
+            <RadioGroup
+              row
+              value={individualDetails.accusedgender || ''}
+              onChange={(e) => handleChange('accusedgender', e.target.value)}
+            >
+              <FormControlLabel value="Male" control={<Radio />} label="Male" />
+              <FormControlLabel value="Female" control={<Radio />} label="Female" />
+              <FormControlLabel value="Other" control={<Radio />} label="Other" />
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

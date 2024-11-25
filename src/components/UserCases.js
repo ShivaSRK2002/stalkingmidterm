@@ -2,45 +2,86 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Divider,
+  Table,
+  TableBody,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   Box,
+  CircularProgress,
   Typography,
   Chip,
   Container,
   Grid,
   Card,
   CardContent,
-  Button,
   Modal,
   Backdrop,
   Fade,
   TextField,
   CardActions,
-  Paper,
+  Avatar,
   InputBase,
   IconButton,
-  Dialog,
-  DialogContent,
-  DialogActions,
-  DialogTitle,
+
+  Pagination,
 } from '@mui/material';
+
+import Tooltip from '@mui/material/Tooltip';
+import InfoIcon from '@mui/icons-material/Info';
+import BadgeIcon from '@mui/icons-material/Badge';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import ChatIcon from '@mui/icons-material/Chat';
+import InvestigatorDetailsModal from './InvestigatorDetailsModal';
+import ChatWidget from "./ChatApp";
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
+import { decryptToken } from "../authUtils";
+import CaseStatusStepper from './CaseStatusStepper';
 
 const UserCases = () => {
   const [cases, setCases] = useState([]);
+  const [open, setOpen] = useState(false); // Modal state
   const [filteredCases, setFilteredCases] = useState([]);
   const [error, setError] = useState(null);
   const [selectedCase, setSelectedCase] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [openDetailsModal, setOpenDetailsModal] = useState(false);
   const [withdrawReason, setWithdrawReason] = useState('');
-  const [userId] = useState('user007'); // Replace with actual userId
+  const [userid] = useState('78f1d3f0-90c1-7093-9f1f-98ce774f64e8'); // Replace with actual userId
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1); // State for pagination
+  const casesPerPage = 6; // Number of cases per page
+  const jwtToken = sessionStorage.getItem('jwt');
+  const token = decryptToken(jwtToken);
+  const [isChatOpen, setIsChatOpen] = useState(false); // State to toggle the chat
+  const [selectedPoliceId, setSelectedPoliceId] = useState(null);
 
-  const userid = 'user007';
-  const categoryid = 24;
-  const token = 'YOUR_JWT_TOKEN_HERE'; // Replace with your actual token
+  const [openInvestigatorModal, setOpenInvestigatorModal] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
+
+  const handleOpenModal = (complaint) => {
+    setSelectedComplaint(complaint); // Set the selected complaint
+    setOpenInvestigatorModal(true); // Open the modal
+  };
+
+
   const navigate = useNavigate();
+  //const token ="eyJraWQiOiJPMGgyenNCR2lacnlSTzBkNklqdDI1SzdteldpREJKejdhK0lBV2R6XC9yVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI3OGYxZDNmMC05MGMxLTcwOTMtOWYxZi05OGNlNzc0ZjY0ZTgiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYmlydGhkYXRlIjoiMjAwMi0xMC0yMCIsImdlbmRlciI6Im1hbGUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0yLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMl9RUHVKZk9hRmMiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiNzhmMWQzZjAtOTBjMS03MDkzLTlmMWYtOThjZTc3NGY2NGU4Iiwib3JpZ2luX2p0aSI6IjU1MmFkN2E3LTYwMjctNDE5OC04MTQ5LTczODUxZDRmMjFkOSIsImF1ZCI6IjJtbnYxN3ZvYTdlOHE2YmFubGcwajBxdGgiLCJldmVudF9pZCI6ImM0MzlkOGE3LTVhZTctNGU0OS1iNDAwLTQxNDQ0YTkxNjMzZiIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMyNDIyODMzLCJuYW1lIjoiU2hpdmEgUmFtYWtyaXNobmFuIiwicGhvbmVfbnVtYmVyIjoiKzkxODgyNTc5MjI2NSIsImV4cCI6MTczMjUwOTIzMywiY3VzdG9tOnJvbGUiOiJ1c2VyIiwiaWF0IjoxNzMyNDIyODMzLCJqdGkiOiI4MWExMDJlNi1iMjA2LTQxNmEtYjg5MS1kYWEzY2ZiMWEyOTIiLCJlbWFpbCI6InNoaXZhcmFtYWtyc2hubkBnbWFpbC5jb20ifQ.q4RJ4Ri0zU34Qbb9yGGz-F3tvozRQI1kUSKbxnWoMxtNyl6GuT1vzrbHrcgSyo8PsZLpusGeZtBKTAbEICwvr6ZBGpNyQsoEMMZx1t0P6Z5i3AD6at9x8OOBpbGB1bvo9uKw0PLUtrz0B81qc13jngXVbH-EP8g1uIBZQD7XBAVLFwFtyRNegsxgafeY8-vTmAXm6nf_owp2FCjN0M6uWMxE1Q6rmqhMvj7gdhNvB3K_Jrh6umeP8A5uTXDzjOkqh_TPmftrC6jGheGYMSJ9epesMe4dfL03lKVcm52DPubdXVsbBIeIGCjCmQrqMqrS3c_3Lpy22p-O6FSDkiAP_g"; // Replace with actual token
+  const categoryid = 24; // Replace with actual category ID
 
   // Fetch cases with POST request
   useEffect(() => {
@@ -49,7 +90,7 @@ const UserCases = () => {
         setLoading(true); // Set loading to true while fetching
         const response = await axios.post(
           'https://p34mpb3lnc.execute-api.eu-west-2.amazonaws.com/User',
-          { userid },
+          { userid: userid },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -84,17 +125,18 @@ const UserCases = () => {
   }, [token, userid, categoryid]);
 
   const handleSearch = () => {
-    if (!searchTerm) {
-      setError('Please enter a complaint ID');
+    // If the search term is empty, show all cases
+    if (!searchTerm.trim()) {
+      setFilteredCases(cases); // Show all cases
       return;
     }
 
     setLoading(true);
     setError(null);
 
-    // Filter the cases based on the search term (complaint ID)
+    // Filter the cases based on the search term (complaint ID), making it case-insensitive
     const results = cases.filter((caseItem) =>
-      caseItem.caseId.toString().includes(searchTerm)
+      caseItem.caseId.toString().startsWith(searchTerm.trim())
     );
 
     // Set the filtered cases to be displayed
@@ -102,9 +144,19 @@ const UserCases = () => {
 
     setLoading(false);
   };
+  const handleChatOpen = (policeId) => {
+    setSelectedPoliceId(policeId);
+    setIsChatOpen(true); // Open the chat widget
+  };
+
+  const handleChatClose = () => {
+    setIsChatOpen(false); // Close the chat widget
+    setSelectedPoliceId(null);
+  };
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
+    handleSearch(); // Trigger search immediately on change
   };
 
   const handleWithdraw = async () => {
@@ -114,7 +166,7 @@ const UserCases = () => {
     }
 
     try {
-      const url = 'https://8lhcpuuc3j.execute-api.eu-west-2.amazonaws.com/FIR';
+      const url = 'https://p34mpb3lnc.execute-api.eu-west-2.amazonaws.com/User';
       const payload = {
         complaintid: selectedCase.caseId,
         categoryid,
@@ -153,16 +205,71 @@ const UserCases = () => {
       alert('An error occurred while withdrawing the complaint. Please try again.');
     }
   };
+  
 
+  const handleStatusDetails = (caseItem) => {
+    setSelectedCase(caseItem); // Set the selected case data
+    setOpen(true); // Open the modal
+  };
+
+  const handleClose = () => {
+    setOpen(false); // Close the modal
+  };
   const handleViewDetails = (caseItem) => {
     setSelectedCase(caseItem);
     setOpenDetailsModal(true);
   };
 
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+  const renderWitnesses = (witnesses) => {
+    if (!witnesses || Object.keys(witnesses).length === 0) return null;
+    return (
+      <Box>
+        <Typography variant="body1" fontWeight="bold" gutterBottom>
+          Witnesses:
+        </Typography>
+        {Object.entries(witnesses).map(([key, value], index) => (
+          <Box key={index} sx={{ mb: 1 }}>
+            <Typography variant="body2" gutterBottom>
+              <strong>Name:</strong> {value.name}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Contact:</strong> {value.contact}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    );
+  };
+
+  const renderDetailsSection = (title, details) => (
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+        {title}
+      </Typography>
+      {details.map(({ label, value }, index) => (
+        value && (
+          <Typography key={index} variant="body2" gutterBottom>
+            <strong>{label}:</strong> {value}
+          </Typography>
+        )
+      ))}
+    </Box>
+  );
+
+  // Calculate the index of the first and last case to display on the current page
+  const indexOfLastCase = currentPage * casesPerPage;
+  const indexOfFirstCase = indexOfLastCase - casesPerPage;
+
+  // Slice the cases to show only the ones on the current page
+  const currentCases = filteredCases.slice(indexOfFirstCase, indexOfLastCase);
+
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Container maxWidth="lg" style={{ marginTop: '2rem' }}>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
         Registered Cases
       </Typography>
@@ -173,15 +280,21 @@ const UserCases = () => {
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
-            handleSearch(); // This will filter the cases and show them on the same page
+            handleSearch();
           }}
-          style={{ display: 'flex', alignItems: 'center', padding: '4px 8px' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            p: 1,
+            borderRadius: 2,
+            boxShadow: 1,
+          }}
         >
           <InputBase
-            placeholder="Search Cases"
+            placeholder="Search cases by ID, police ID, or status..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ flex: 1 }}
+            onChange={handleSearchChange}
+            sx={{ flex: 1, px: 1 }}
           />
           <IconButton type="submit" color="primary">
             <SearchIcon />
@@ -189,78 +302,185 @@ const UserCases = () => {
         </Paper>
       </Box>
 
-      {/* Error Message Display */}
+      {/* Error Message */}
       {error && <Typography color="error">{error}</Typography>}
 
       {/* Loading Indicator */}
       {loading && <Typography>Loading...</Typography>}
 
-      {/* Display filtered cases */}
-      <Grid container spacing={3}>
-        {filteredCases.length > 0 ? (
-          filteredCases.map((caseItem, index) => (
+      {/* Display Cases */}
+      <Grid container spacing={4}>
+        {currentCases.length > 0 ? (
+          currentCases.map((caseItem, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Case ID: {caseItem.caseId}
-                  </Typography>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Police ID: {caseItem.policeId} | FIR Filed: {caseItem.isFirFiled}
-                  </Typography>
-                  <Chip
-                    label={caseItem.casestatus}
-                    color="info"
-                    size="small"
-                    style={{ marginTop: '8px' }}
-                  />
-                  <Box mt={2}>
-                    {caseItem.iswithdrawn ? (
-                      <Chip
-                        label="Withdrawn"
-                        color="secondary"
-                        size="small"
-                        style={{ marginTop: '8px' }}
-                      />
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setSelectedCase(caseItem);
-                          setOpenModal(true);
-                        }}
-                      >
-                        Withdraw
-                      </Button>
-                    )}
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 2,
+                  borderRadius: 4,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  height: '100%',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                  transition: 'transform 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                  },
+                }}
+              >
+                {/* Header */}
+                <Box
+                  sx={{
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box display="flex" alignItems="center">
+                    <Avatar
+                      sx={{
+                        bgcolor: caseItem.casestatus === 'Active' ? 'success.main' : 'info.main',
+                        mr: 2,
+                      }}
+                    >
+                      {caseItem.casestatus.charAt(0)}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                        Case #{caseItem.caseId}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Officer ID: {caseItem.policeId}
+                      </Typography>
+                    </Box>
                   </Box>
-                </CardContent>
-                <CardActions>
+                  <Box display="flex" gap={1}>
+                    {/* Tooltip Button */}
+                    <Tooltip title="Chat with Officer">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleChatOpen(caseItem.policeId,userid)}
+                      >
+                        <ChatIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Video Call">
+                      <IconButton
+                        size="small"
+                        color="success"
+                        onClick={() => navigate('/videocall', { state: { policeId: caseItem.policeId, userid } })}
+                      >
+                        <VideoCallIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+
+                {/* Card Content */}
+                <Box
+                  sx={{
+                    mt: 2,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 2,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {/* Details Button */}
                   <Button
                     size="small"
-                    color="primary"
+                    variant="outlined"
+                    startIcon={<InfoIcon />}
                     onClick={() => handleViewDetails(caseItem)}
                   >
-                    View Details
+                    Details
                   </Button>
+
+                  <Button
+        size="small"
+        variant="outlined"
+        startIcon={<BadgeIcon />}
+        onClick={() => handleOpenModal(caseItem)} // Opens the modal when clicked
+      >
+        Investigator
+      </Button>
+
+      {/* InvestigatorDetailsModal */}
+      {openInvestigatorModal && selectedComplaint && (
+        <InvestigatorDetailsModal
+          complaint={selectedComplaint} // Pass only the selected complaint
+          openInvestigatorModal={openInvestigatorModal} // Modal visibility state
+          setOpenInvestigatorModal={setOpenInvestigatorModal} // Function to close modal
+          token={token} // Authorization token
+        />
+      )}
+
+                  {/* Status Button */}
                   <Button
                     size="small"
-                    color="secondary"
-                    onClick={() => navigate('/chat', { state: { policeId: caseItem.policeId, userid } })}
+                    variant="outlined"
+                    color="success"
+                    startIcon={<AssessmentIcon />}
+                    onClick={() => handleStatusDetails(caseItem)}
                   >
-                    Chat
+                    Status
                   </Button>
-                </CardActions>
-              </Card>
+
+                  {/* Withdrawn or Withdraw Button */}
+                  {caseItem.iswithdrawn ? (
+                    <Chip label="Withdrawn" color="error" size="small" sx={{ fontWeight: 500 }} />
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        setSelectedCase(caseItem);
+                        setOpenModal(true);
+                      }}
+                    >
+                      Withdraw
+                    </Button>
+                  )}
+                </Box>
+              </Paper>
             </Grid>
           ))
         ) : (
-          <Typography variant="body1">No cases found matching the search term.</Typography>
+          <Grid item xs={12}>
+            <Typography variant="h6" color="textSecondary" textAlign="center">
+              No cases found.
+            </Typography>
+          </Grid>
         )}
       </Grid>
 
+      {/* Conditionally Render ChatWidget */}
+      {isChatOpen && selectedPoliceId && (
+        <div style={{zIndex: 1000 }}>
+          <ChatWidget
+            userid={userid}
+            policeId={selectedPoliceId}
+            onClose={handleChatClose} // Pass a close handler
+          />
+        </div>
+      )}
+
+      {/* Pagination */}
+      <Box mt={4} display="flex" justifyContent="center">
+        <Pagination
+          count={Math.ceil(filteredCases.length / casesPerPage)}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </Box>
+
+      {/* Modals */}
       {/* Withdrawal Modal */}
       <Modal
         open={openModal}
@@ -296,20 +516,98 @@ const UserCases = () => {
         </Fade>
       </Modal>
 
-      {/* Case Details Modal */}
-      <Dialog open={openDetailsModal} onClose={() => setOpenDetailsModal(false)}>
-        <DialogTitle>Case Details</DialogTitle>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 500, // Increased width
+            minHeight: 300, // Added minHeight for vertical spacing
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 5, // Increased padding for more internal spacing
+          }}
+        >
+          <h2>Case Status</h2>
+          {selectedCase ? (
+            <CaseStatusStepper activeStep={selectedCase.statusStep || 0} />
+          ) : (
+            <p>Loading case details...</p>
+          )}
+        </Box>
+      </Modal>
+
+      {/* details */}
+      <Dialog open={openDetailsModal} onClose={() => setOpenDetailsModal(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Typography variant="h6" component="div" fontWeight="bold">
+            Complaint Details
+          </Typography>
+        </DialogTitle>
         <DialogContent>
-          <Typography variant="body1">Case ID: {selectedCase?.caseId}</Typography>
-          <Typography variant="body1">Police ID: {selectedCase?.policeId}</Typography>
-          <Typography variant="body1">Status: {selectedCase?.casestatus}</Typography>
-          <Typography variant="body1">Withdrawal Reason: {selectedCase?.reasonforwithdrawal}</Typography>
+          {selectedCase && (
+            <Paper variant="outlined" sx={{ padding: 2, backgroundColor: '#f9f9f9', borderRadius: 2 }}>
+              {/* Incident Details */}
+              {renderDetailsSection('Incident Details', [
+                { label: 'Incident Date', value: selectedCase.individualdetails?.incidentDate },
+                { label: 'Incident Time', value: selectedCase.individualdetails?.incidentTime },
+                { label: 'Incident Location', value: selectedCase.individualdetails?.incidentLocation },
+                { label: 'Nature of Stalking', value: selectedCase.individualdetails?.natureOfStalking },
+                { label: 'Description', value: selectedCase.individualdetails?.incidentDescription },
+              ])}
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Personal Information */}
+              {renderDetailsSection('Personal Information', [
+                { label: 'Full Name', value: selectedCase.individualdetails?.fullName },
+                { label: 'Email Address', value: selectedCase.individualdetails?.emailAddress },
+                { label: 'Phone Number', value: selectedCase.individualdetails?.phoneNumber },
+                { label: 'Address', value: selectedCase.individualdetails?.address },
+                { label: 'Gender', value: selectedCase.individualdetails?.gender },
+                {
+                  label: 'Identification Proof',
+                  value: `${selectedCase.individualdetails?.identificationProofType || ''} - ${selectedCase.individualdetails?.identificationProofNumber || ''
+                    }`,
+                },
+              ])}
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Accused Details */}
+              {renderDetailsSection('Accused Details', [
+                { label: 'Name', value: selectedCase.individualdetails?.accusedName },
+                { label: 'Location', value: selectedCase.individualdetails?.accusedLocation },
+                { label: 'Relation', value: selectedCase.individualdetails?.relation },
+                { label: 'Gender', value: selectedCase.individualdetails?.accusedgender },
+              ])}
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Witnesses */}
+              {renderWitnesses(selectedCase.individualdetails?.witnesses)}
+            </Paper>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDetailsModal(false)} color="primary">Close</Button>
+          <Button onClick={() => setOpenDetailsModal(false)} variant="contained" color="primary">
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>
+
   );
 };
 

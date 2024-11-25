@@ -1,41 +1,31 @@
 import React from "react";
 import { motion } from "framer-motion";
-//import './LoadingScreen.css';  // Create a CSS file for custom styles
-
-const LoadingScreen = () => {
+import logo from "../assets/DiGiPo.png";
+ 
+// LogoSpinner component accepts a `isPulse` prop to decide the animation type
+const LogoSpinner = ({ isPulse }) => {
   return (
-    <motion.div
-      className="loading-container"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
-    >
-      <motion.div
-        className="loading-icon"
+    <div className="flex justify-center items-center min-h-screen bg-blue-100">
+      <motion.img
+        src={logo}
+        alt="Loading"
+        className="w-40 h-40"
         animate={{
-          rotate: 360,
+          // Choose animation based on `isPulse` prop
+          rotateY: isPulse ? 0 : 360, // No rotation in pulse, rotation in old effect
+          scale: isPulse ? [1, 1.1, 1] : [1, 1.2, 1], // Pulse effect or larger scaling for old effect
         }}
         transition={{
-          repeat: Infinity,
-          duration: 1.5,
-          ease: "linear",
+          repeat: isPulse ? Infinity : 0, // Pulse loops infinitely, rotation does not
+          duration: isPulse ? 1.5 : 2, // Shorter duration for pulse
+          ease: "easeInOut",
+          times: [0, 0.5, 1], // Pulse timing
         }}
-      >
-        🔄
-      </motion.div>
-      
-      <motion.p
-        className="loading-text"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 1, delay: 0.5 }}
-      >
-        Loading...
-      </motion.p>
-    </motion.div>
+        style={{ transformStyle: "preserve-3d" }} // Keep 3D effect for the old animation
+      />
+    </div>
   );
 };
-
-export default LoadingScreen;
+ 
+export default LogoSpinner;
+ 

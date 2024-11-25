@@ -34,6 +34,7 @@ const AdditionalDetails = ({ updateFormData, formData }) => {
         margin="normal"
         multiline
         rows={4}
+        placeholder="Enter any additional comments or information..."
       />
 
       <Typography variant="h6" gutterBottom sx={{ marginTop: 2 }}>
@@ -49,6 +50,8 @@ const AdditionalDetails = ({ updateFormData, formData }) => {
             onChange={(e) => handleWitnessChange(index, 'name', e.target.value)}
             fullWidth
             margin="normal"
+            required
+            placeholder="Enter witness name"
           />
           <TextField
             label="Witness Contact"
@@ -56,12 +59,18 @@ const AdditionalDetails = ({ updateFormData, formData }) => {
             onChange={(e) => handleWitnessChange(index, 'contact', e.target.value)}
             fullWidth
             margin="normal"
+            required
+            placeholder="Enter witness contact"
           />
         </Box>
       ))}
 
       {/* Button to add new witness */}
-      <Button onClick={handleAddWitness} variant="outlined" sx={{ marginTop: 2 }}>
+      <Button
+        onClick={handleAddWitness}
+        variant="outlined"
+        sx={{ marginTop: 2 }}
+      >
         Add Witness
       </Button>
     </Box>

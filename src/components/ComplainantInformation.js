@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, InputAdornment, MenuItem, Button } from '@mui/material';
+import { Box, Typography, TextField, InputAdornment, MenuItem, Button, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import HomeIcon from '@mui/icons-material/Home';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -18,7 +18,7 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
 
   const validateFields = () => {
     const newErrors = {};
-    
+
     // Validate Full Name
     if (!individualDetails.fullName) {
       newErrors.fullName = 'Full name is required';
@@ -49,6 +49,11 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
       newErrors.identificationProofNumber = 'Identification proof number is required';
     }
 
+    // Validate Gender
+    if (!individualDetails.gender) {
+      newErrors.gender = 'Gender is required';
+    }
+
     setErrors(newErrors);
 
     // Return whether the form is valid
@@ -57,7 +62,8 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
 
   // Update the parent component with form validity
   useEffect(() => {
-    setStepValid(validateFields());
+    const isValid = validateFields();
+    setStepValid(isValid);
   }, [individualDetails, setStepValid]);
 
   const handleNext = () => {
@@ -80,8 +86,6 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
         fullWidth
         margin="normal"
         required
-        error={!!errors.fullName}
-        helperText={errors.fullName}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -101,8 +105,6 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
         multiline
         rows={3}
         required
-        error={!!errors.address}
-        helperText={errors.address}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -121,8 +123,6 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
         fullWidth
         margin="normal"
         required
-        error={!!errors.phoneNumber}
-        helperText={errors.phoneNumber}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -140,8 +140,6 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
         onChange={(e) => handleChange('emailAddress', e.target.value)}
         fullWidth
         margin="normal"
-        error={!!errors.emailAddress}
-        helperText={errors.emailAddress}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -160,8 +158,6 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
         fullWidth
         margin="normal"
         required
-        error={!!errors.identificationProofType}
-        helperText={errors.identificationProofType}
       >
         {identificationProofTypes.map((type) => (
           <MenuItem key={type} value={type}>
@@ -178,8 +174,6 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
         fullWidth
         margin="normal"
         required
-        error={!!errors.identificationProofNumber}
-        helperText={errors.identificationProofNumber}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -189,7 +183,19 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
         }}
       />
 
-      
+      {/* Gender */}
+      <FormControl component="fieldset" fullWidth margin="normal" required>
+        <FormLabel component="legend">Gender</FormLabel>
+        <RadioGroup
+          row
+          value={individualDetails.gender || ''}
+          onChange={(e) => handleChange('gender', e.target.value)}
+        >
+          <FormControlLabel value="Male" control={<Radio />} label="Male" />
+          <FormControlLabel value="Female" control={<Radio />} label="Female" />
+          <FormControlLabel value="Other" control={<Radio />} label="Other" />
+        </RadioGroup>
+      </FormControl>
     </Box>
   );
 };

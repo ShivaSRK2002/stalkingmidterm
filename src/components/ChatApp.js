@@ -3,10 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import websocketService from "./websocketService";
 import { fetchMessageHistory } from "./messageService";
 
-const ChatWidget = () => {
+const ChatWidget = ({userid , policeId , onClose}) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userid, policeId } = location.state || {};
+  // const { userid, policeId } = location.state || {};
 
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -89,11 +89,11 @@ const ChatWidget = () => {
         bottom: "20px",
         right: "20px",
         width: "100%",
-        maxWidth: "350px",
-        height: "480px",
-        backgroundColor: "#fff",
-        borderRadius: "8px",
-        boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
+        maxWidth: "400px",
+        height: "500px",
+        backgroundColor: "#ECE5DD", // WhatsApp's background color
+        borderRadius: "20px",
+        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
         display: "flex",
         flexDirection: "column",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -103,15 +103,15 @@ const ChatWidget = () => {
       <div
         style={{
           padding: "12px 15px",
-          backgroundColor: "#007bff",
+          background: "linear-gradient(90deg, #075E54, #128C7E)", // WhatsApp green gradient
           color: "#fff",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderRadius: "8px 8px 0 0",
+          borderRadius: "20px 20px 0 0",
         }}
       >
-        <span style={{ fontWeight: "bold", fontSize: "16px" }}>Chat with Police</span>
+        <span style={{ fontWeight: "bold", fontSize: "16px" }}>Chat</span>
         <button
           style={{
             background: "transparent",
@@ -120,7 +120,7 @@ const ChatWidget = () => {
             cursor: "pointer",
             fontSize: "16px",
           }}
-          onClick={() => navigate(-1)}
+          onClick={() => onClose()}
         >
           ✖
         </button>
@@ -132,7 +132,7 @@ const ChatWidget = () => {
           flex: 1,
           overflowY: "auto",
           padding: "10px",
-          backgroundColor: "#f9f9f9",
+          backgroundColor: "#ECE5DD", // Light beige background
         }}
       >
         {messages.map((msg, index) => (
@@ -148,18 +148,19 @@ const ChatWidget = () => {
               style={{
                 maxWidth: "75%",
                 padding: "10px",
-                borderRadius: "12px",
-                backgroundColor: msg.isSent ? "#007bff" : "#e0e0e0",
-                color: msg.isSent ? "#fff" : "#000",
+                borderRadius: "15px",
+                backgroundColor: msg.isSent ? "#DCF8C6" : "#FFFFFF", // WhatsApp bubble colors
+                color: "#000",
                 wordWrap: "break-word",
                 fontSize: "14px",
+                boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
               }}
             >
               <div>{msg.content}</div>
               <div
                 style={{
                   fontSize: "0.75em",
-                  color: msg.isSent ? "#d1e7ff" : "#555",
+                  color: "#888",
                   textAlign: "right",
                   marginTop: "5px",
                 }}
@@ -177,8 +178,9 @@ const ChatWidget = () => {
         style={{
           display: "flex",
           padding: "10px",
-          borderTop: "1px solid #ccc",
-          backgroundColor: "#fff",
+          backgroundColor: "#FFFFFF",
+          borderTop: "1px solid #ddd",
+          borderRadius: "0 0 20px 20px",
         }}
       >
         <input
@@ -186,33 +188,35 @@ const ChatWidget = () => {
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="Type your message..."
+          placeholder="Type a message"
           style={{
             flex: 1,
             padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
+            border: "none",
+            borderRadius: "20px",
             outline: "none",
             fontSize: "14px",
+            marginRight: "10px",
+            backgroundColor: "#F0F0F0", // Lighter input box background
+            boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
           }}
         />
         <button
           onClick={handleSendMessage}
           style={{
-            marginLeft: "10px",
             padding: "10px 15px",
-            backgroundColor: "#007bff",
+            backgroundColor: "#25D366", // WhatsApp green send button
             color: "#fff",
             border: "none",
-            borderRadius: "5px",
+            borderRadius: "50%",
             cursor: "pointer",
-            fontSize: "14px",
-            transition: "background-color 0.3s ease",
+            fontSize: "16px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
-          onMouseOver={(e) => (e.target.style.backgroundColor = "#0056b3")}
-          onMouseOut={(e) => (e.target.style.backgroundColor = "#007bff")}
         >
-          Send
+          ➤
         </button>
       </div>
     </div>

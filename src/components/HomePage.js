@@ -1,185 +1,293 @@
 import React, { useEffect } from "react";
+import { ArrowForward } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Button, Box, Container, Typography, Grid, Paper, Divider } from "@mui/material";
-import { ArrowForward, Report, CheckCircle, HelpOutline, LocationOn } from "@mui/icons-material";
-import Header from "../Header";
+import { Button, Box, Container, Typography, Grid, Paper, useMediaQuery } from "@mui/material";
+import { ReportOutlined, CheckCircleOutline, HelpOutlineOutlined, LocationOnOutlined } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
+import { Helmet } from "react-helmet";
+
+// Animations
+const cardAnimation = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 50, damping: 15, ease: "easeOut" },
+  },
+};
+
+const containerAnimation = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.2 },
+  },
+};
+
+// Reusable Iframe Component
+const ResponsiveIframe = ({ src, title }) => (
+  <Box
+    sx={{
+      width: "100%",
+      height: "300px",
+      borderRadius: 2,
+      overflow: "hidden",
+      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+    }}
+  >
+    <iframe
+      width="100%"
+      height="100%"
+      src={src}
+      frameBorder="0"
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+      title={title}
+      aria-label={title}
+    ></iframe>
+  </Box>
+);
+
+// Landing Page Card Component
+const LandingCard = ({ title, description, icon, buttonText, onClick }) => (
+  <Grid item xs={12} sm={6} md={3}>
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      variants={cardAnimation}
+    >
+      <Paper
+        elevation={10}
+        sx={{
+          p: { xs: 2, sm: 3 },
+          textAlign: "center",
+          borderRadius: 4,
+          height: "350px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: "#ffffff",
+          border: "1px solid #e0e0e0",
+          transition: "all 0.3s ease",
+          "&:hover": {
+            backgroundColor: "#f3f6fa",
+            boxShadow: "0 15px 40px rgba(0, 0, 0, 0.2)",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            color: "#1a237e",
+            fontSize: "3rem",
+            backgroundColor: "#e8f4fd",
+            borderRadius: "50%",
+            padding: 2,
+            width: "80px",
+            height: "80px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          aria-label={`${title} icon`}
+        >
+          {icon}
+        </Box>
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 2,
+            fontWeight: 700,
+            color: "#0d47a1",
+            fontSize: { xs: "1rem", sm: "1.25rem" },
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{ mt: 1, color: "#616161", lineHeight: 1.6 }}
+        >
+          {description}
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{
+            mt: 2,
+            backgroundColor: "#1a237e",
+            "&:hover": { backgroundColor: "#0d193d" },
+          }}
+          onClick={onClick}
+        >
+          {buttonText}
+          <ArrowForward fontSize="small" sx={{ ml: 1 }} />
+        </Button>
+      </Paper>
+    </motion.div>
+  </Grid>
+);
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     document.title = "Stalking Complaint Portal | Home";
   }, []);
 
-  const handleFileComplaint = () => navigate("/complaint-form");
-  const handleViewStatus = () => navigate("/user-cases");
-  const handleContactUs = () => navigate("/contact-us");
-  const handleFindPoliceStations = () => navigate("/map");
-
-  const Card = ({ title, description, icon, buttonText, onClick }) => (
-    <Grid item xs={12} sm={6} md={4}>
-      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ duration: 0.2 }}>
-        <Paper
-          elevation={3}
-          sx={{
-            p: 3,
-            textAlign: "center",
-            cursor: "pointer",
-            borderRadius: 2,
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            "&:hover": { boxShadow: 6, backgroundColor: "#f5f5f5" },
-          }}
-        >
-          {icon}
-          <Typography variant="h6" sx={{ mt: 2, fontWeight: 600 }}>
-            {title}
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1, color: "#666", lineHeight: 1.5 }}>
-            {description}
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2, px: 3 }}
-            onClick={onClick}
-            aria-label={`Navigate to ${title} section`}
-          >
-            {buttonText} <ArrowForward fontSize="small" sx={{ ml: 1 }} />
-          </Button>
-        </Paper>
-      </motion.div>
-    </Grid>
-  );
+  const cardsData = [
+    {
+      title: "File a Complaint",
+      description:
+        "Submit your complaint securely. Our officers are here to assist and support you.",
+      icon: <ReportOutlined fontSize="large" />,
+      buttonText: "Raise Complaint",
+      onClick: () => navigate("/complaint-form"),
+    },
+    {
+      title: "Track Complaint Status",
+      description: "Stay updated with real-time progress of your complaint.",
+      icon: <CheckCircleOutline fontSize="large" />,
+      buttonText: "View Status",
+      onClick: () => navigate("/user-cases"),
+    },
+    {
+      title: "Guidance & Support",
+      description: "Get expert guidance and support tailored to your needs.",
+      icon: <HelpOutlineOutlined fontSize="large" />,
+      buttonText: "Get Help",
+      onClick: () => navigate("/contact-us"),
+    },
+    {
+      title: "Find Police Stations",
+      description: "Locate nearby police stations quickly and conveniently.",
+      icon: <LocationOnOutlined fontSize="large" />,
+      buttonText: "Find Now",
+      onClick: () => navigate("/map"),
+    },
+  ];
 
   return (
     <>
-      {/* Header */}
-      <Header />
+      <Helmet>
+        <title>Stalking Complaint Portal | Home</title>
+        <meta
+          name="description"
+          content="Empower yourself to take action against stalking. Report complaints, track progress, and access guidance – all in one place."
+        />
+      </Helmet>
 
-      {/* Main Content */}
-      <Container
-        maxWidth="lg"
+      {/* Hero Section */}
+      <Box
         sx={{
-          py: 6,
-          backgroundColor: "#f8f9fa",
-          minHeight: "100vh",
-          borderRadius: 2,
-          boxShadow: 3,
-          mt: "90px", // Adjust margin for fixed header
-          px: { xs: 2, sm: 3 },
+          py: 10,
+          background: "linear-gradient(135deg, #1a237e 30%, #3949ab 90%)",
+          color: "#ffffff",
+          textAlign: "center",
         }}
       >
-        {/* Introduction */}
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2 }}
-          style={{ textAlign: "center", marginBottom: "40px" }}
+          transition={{ duration: 1 }}
         >
           <Typography
-            variant="h3"
-            sx={{
-              fontSize: { xs: "2rem", sm: "2.8rem" },
-              fontWeight: 700,
-              color: "#2C3E50",
-              letterSpacing: 1.2,
-              textAlign: "center",
-            }}
+            variant={isMobile ? "h4" : "h3"}
+            sx={{ fontWeight: 700 }}
           >
-            Welcome to the Stalking Complaint Portal
+            Your Safety, Our Priority
           </Typography>
-
           <Typography
             variant="body1"
-            sx={{
-              color: "#555",
-              fontSize: "1.2rem",
-              maxWidth: "700px",
-              mx: "auto",
-              lineHeight: 1.8,
-              textAlign: "center",
-              mt: 2,
-            }}
+            sx={{ mt: 2, maxWidth: "700px", mx: "auto" }}
           >
-            A secure platform to report stalking complaints, monitor case status, and receive guidance. 
-            Your safety is our priority.
+            Empowering you to take action. Report stalking, track progress, and
+            access guidance – all in one place.
           </Typography>
+          <Box sx={{ mt: 4 }}>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#ffffff",
+                color: "#1a237e",
+                mr: 2,
+                "&:hover": { backgroundColor: "#e8f4fd" },
+              }}
+              onClick={() => navigate("/complaint-form")}
+            >
+              File a Complaint
+            </Button>
+            <Button
+              variant="outlined"
+              sx={{
+                borderColor: "#ffffff",
+                color: "#ffffff",
+                "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+              }}
+              onClick={() => navigate("/about")}
+            >
+              Learn More
+            </Button>
+          </Box>
         </motion.div>
+      </Box>
 
-        {/* Cards Section */}
-        <Grid container spacing={4} justifyContent="center">
-          {[ 
-            {
-              title: "File a Complaint",
-              description: "Submit your complaint securely. Our officers are here to assist and support you.",
-              icon: <Report fontSize="large" color="primary" />,
-              onClick: handleFileComplaint,
-              buttonText: "Raise Complaint",
-            },
-            {
-              title: "Track Complaint Status",
-              description: "Stay updated with real-time progress of your complaint.",
-              icon: <CheckCircle fontSize="large" color="success" />,
-              onClick: handleViewStatus,
-              buttonText: "View Status",
-            },
-            {
-              title: "Guidance & Support",
-              description: "Get expert guidance and support tailored to your needs.",
-              icon: <HelpOutline fontSize="large" color="secondary" />,
-              onClick: handleContactUs,
-              buttonText: "Get Help",
-            },
-            {
-              title: "Find Police Stations",
-              description: "Locate nearby police stations quickly and conveniently.",
-              icon: <LocationOn fontSize="large" color="info" />,
-              onClick: handleFindPoliceStations,
-              buttonText: "Find Now",
-            },
-          ].map((card, index) => (
-            <Card key={index} {...card} />
+      {/* Cards Section */}
+      <Container sx={{ py: 6 }}>
+        <Grid
+          container
+          spacing={4}
+          justifyContent="center"
+          component={motion.div}
+          variants={containerAnimation}
+        >
+          {cardsData.map((card, index) => (
+            <LandingCard key={index} {...card} />
           ))}
         </Grid>
-
-        {/* Informative Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1.2 }}
-          style={{ marginTop: "50px" }}
-        >
-          <Divider sx={{ my: 4 }} />
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 600,
-              color: "#2C3E50",
-              textAlign: "center",
-              mb: 2,
-            }}
-          >
-            Know Your Rights & the Law on Stalking in India
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: "#555",
-              fontSize: "1.1rem",
-              lineHeight: 1.8,
-              maxWidth: "700px",
-              mx: "auto",
-              textAlign: "center",
-            }}
-          >
-            Stalking is a punishable offense under Section 354D of the Indian Penal Code. Use this platform to take action and access resources for support.
-          </Typography>
-        </motion.div>
       </Container>
+
+      {/* Informative Section */}
+      <Box
+        sx={{
+          py: 8,
+          px: 4,
+          backgroundColor: "#f3f6fa",
+          textAlign: "center",
+        }}
+      >
+        <Typography
+          variant={isMobile ? "h5" : "h4"}
+          sx={{ fontWeight: 600, color: "#283593" }}
+        >
+          Learn More About Stalking and Your Rights
+        </Typography>
+        <Grid container spacing={4} sx={{ mt: 4 }}>
+          <Grid item xs={12} md={6}>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#616161",
+                lineHeight: 1.8,
+                textAlign: "left",
+              }}
+            >
+              Stalking is a punishable offense under Section 354D of the Indian
+              Penal Code. Our mission is to empower individuals to report and
+              address stalking confidently and securely.
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <ResponsiveIframe
+              src="https://www.youtube.com/embed/ZHeUddArYtk"
+              title="Explainer Video"
+            />
+          </Grid>
+        </Grid>
+      </Box>
     </>
   );
 };

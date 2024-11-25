@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -11,7 +11,8 @@ import {
   TableHead,
   TableRow,
   Paper,
-} from "@mui/material";
+  Button,
+} from '@mui/material';
 
 const ReviewAndSubmit = ({ handleSubmit, formData }) => {
   const [loading, setLoading] = useState(false);
@@ -22,21 +23,38 @@ const ReviewAndSubmit = ({ handleSubmit, formData }) => {
     setError(null);
 
     try {
+      // Filter out empty fields before submission (optional).
       const filteredFormData = Object.fromEntries(
-        Object.entries(formData).filter(([_, value]) => value !== null && value !== "")
+        Object.entries(formData).filter(([_, value]) => value !== null && value !== '')
       );
 
-      await handleSubmit(filteredFormData);
+      // Stringify nested objects for submission if necessary.
+      const processedData = { ...filteredFormData };
+      for (const key in processedData) {
+        if (processedData[key] && typeof processedData[key] === 'object') {
+          processedData[key] = JSON.stringify(processedData[key]);
+        }
+      }
+
+      await handleSubmit(processedData);
       setLoading(false);
     } catch (err) {
-      setError("Submission failed. Please try again.");
-      console.error("Error during submission:", err);
+      setError('Submission failed. Please try again.');
+      console.error('Error during submission:', err);
       setLoading(false);
     }
   };
 
-  // Use `individualdetails` directly as it's already an object
-  const individualDetails = formData.individualdetails;
+  // Helper function to render table rows for a given object
+  const renderTableRows = (data, prefix = '') =>
+    Object.entries(data).map(([key, value]) => (
+      <TableRow key={prefix + key}>
+        <TableCell>{prefix ? `${prefix}.${key}` : key}</TableCell>
+        <TableCell>
+          {typeof value === 'object' && value !== null ? JSON.stringify(value, null, 2) : value}
+        </TableCell>
+      </TableRow>
+    ));
 
   return (
     <Box>
@@ -44,22 +62,18 @@ const ReviewAndSubmit = ({ handleSubmit, formData }) => {
         Review and Submit
       </Typography>
 
-      {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-          <CircularProgress />
-        </Box>
-      )}
-
-      {!individualDetails || Object.keys(individualDetails).length === 0 ? (
+      {Object.keys(formData).length === 0 ? (
         <Typography variant="body1" color="textSecondary">
-          No individual details available to display.
+          No details provided. Please fill in the required fields.
         </Typography>
       ) : (
         <Box sx={{ my: 2 }}>
           <Typography variant="h6" gutterBottom>
-            Individual Details
+            Complaint Details
           </Typography>
-          <TableContainer component={Paper}>
+
+          {/* Table to display all fields, including nested individualDetails */}
+          <TableContainer component={Paper} sx={{ mb: 2 }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -68,18 +82,9 @@ const ReviewAndSubmit = ({ handleSubmit, formData }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {Object.entries(individualDetails).map(([key, value]) => (
-                  <TableRow key={key}>
-                    <TableCell>
-                      <strong>{key.replace(/([A-Z])/g, " $1").replace(/_/g, " ").trim()}</strong>
-                    </TableCell>
-                    <TableCell>
-                      {Array.isArray(value) && value.length === 0
-                        ? "None"
-                        : value}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {renderTableRows(formData)}
+                {formData.individualDetails &&
+                  renderTableRows(formData.individualDetails, 'individualDetails')}
               </TableBody>
             </Table>
           </TableContainer>
@@ -90,6 +95,19 @@ const ReviewAndSubmit = ({ handleSubmit, formData }) => {
         <Alert severity="error" sx={{ my: 2 }}>
           {error}
         </Alert>
+      )}
+
+      {/* Loading Spinner */}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button variant="contained" color="primary" onClick={onSubmit}>
+            Submit
+          </Button>
+        </Box>
       )}
     </Box>
   );

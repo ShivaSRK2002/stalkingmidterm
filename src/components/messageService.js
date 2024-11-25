@@ -1,10 +1,16 @@
+import { decryptToken } from "../authUtils";
+
+ 
 export async function fetchMessageHistory(senderId, receiverId, lastEvaluatedKey = null, limit = 10) {
+  const jwtToken = sessionStorage.getItem('jwt');  
+  const token = decryptToken(jwtToken);
   try {
+    
     const response = await fetch("https://8jtaj9psal.execute-api.eu-west-1.amazonaws.com/Dev", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer eyJraWQiOiJPMGgyenNCR2lacnlSTzBkNklqdDI1SzdteldpREJKejdhK0lBV2R6XC9yVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJlODMxZjMyMC0zMDQxLTcwYzctYjcxYS0zZGUzNjc1ZDVkNmMiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYmlydGhkYXRlIjoiMjBcLzEwXC8yMDAyIiwiZ2VuZGVyIjoiTWFsZSIsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy13ZXN0LTIuYW1hem9uYXdzLmNvbVwvdXMtd2VzdC0yX1FQdUpmT2FGYyIsInBob25lX251bWJlcl92ZXJpZmllZCI6ZmFsc2UsImNvZ25pdG86dXNlcm5hbWUiOiJlODMxZjMyMC0zMDQxLTcwYzctYjcxYS0zZGUzNjc1ZDVkNmMiLCJvcmlnaW5fanRpIjoiNDkyODQ1MTUtNjQ4ZC00N2EzLTljYTItZTM5NzZhYzZhMWNmIiwiYXVkIjoiMm1udjE3dm9hN2U4cTZiYW5sZzBqMHF0aCIsImV2ZW50X2lkIjoiYWQzYWRmOGItNjA4Mi00NGI4LTlmMWMtNGUxZDU0NjFkZTM5IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3MzIwNzc5MzIsIm5hbWUiOiJTaGl2YSIsInBob25lX251bWJlciI6Iis5MTg4MjU3OTIyNjUiLCJleHAiOjE3MzIxNjQzMzIsImN1c3RvbTpyb2xlIjoidXNlciIsImlhdCI6MTczMjA3NzkzMiwianRpIjoiMmY4MDYzY2QtOTM2Yi00MjA1LTg3OTctY2JhZGJhZGZlZDc2IiwiZW1haWwiOiJzaGl2YXJhbWFrcnNobm5AZ21haWwuY29tIn0.BFXiE_aUW2_u1slt8gTjs9THcDTGmbJ5kG0OTJaJ3Tqzchem2nhQRySfPGqbw0Cc0KJ1ycAkG1zsv2COfaMjMC1T4Uw85OaG0c7urYWOtnk2e2QQ5S4LZ87BRd9jlf5FlDMJFxznnPTnGH5OTlDSUAozINJkEEO1sHcPlrRwTpeG6nhif_AsC1bCyeONy-HCdCjR8g17vT7kGBjsb1lKezEMpKx6rY4x14eEOaBf_YVG10ylB6yTFeCXvkCGrABDyVHdZ9Cvr6qA0jTcmjEL6yLM5uoSqiuaJddIYylsGFnK2W7bpI7AUn3tKp3HUsE5xGW3Ir3UQNsXo3h4VQ87Cw",
+      'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         senderId: senderId,

@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Card, CardContent, Avatar, Grid } from "@mui/material";
+import { Container, Typography, Card, CardContent, Avatar, Grid, Box, Button, Link } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import { decryptToken } from "../authUtils";
 import { Email, DateRange, Phone, Accessibility } from '@mui/icons-material'; // Corrected imports
+import Skeleton from '@mui/material/Skeleton';
+
+// Function to handle missing user data gracefully
+const getUserField = (field, fallback) => (field ? field : fallback);
 
 const ProfilePage = () => {
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Retrieve the encrypted JWT token from session storage
@@ -28,20 +33,30 @@ const ProfilePage = () => {
     } else {
       console.warn("No encrypted token found in session storage.");
     }
+
+    setLoading(false); // Once data fetching and decryption are done, stop the loading state
   }, []);
 
-  if (!userData) {
-    console.log("No user data available, rendering fallback message.");
+  if (loading) {
     return (
       <Container>
-        <Typography variant="h5" sx={{ textAlign: "center", mt: 4 }}>
-          No user information available. Please log in.
-        </Typography>
+        <Skeleton variant="circular" width={80} height={80} sx={{ mx: 'auto', mb: 2 }} />
+        <Skeleton variant="text" width="60%" sx={{ mx: 'auto' }} />
+        <Skeleton variant="text" width="80%" sx={{ mx: 'auto', mb: 1 }} />
+        <Skeleton variant="text" width="80%" sx={{ mx: 'auto', mb: 1 }} />
       </Container>
     );
   }
 
-  console.log("Rendering user profile with data:", userData);
+  if (!userData) {
+    return (
+      <Container>
+        <Typography variant="h5" sx={{ textAlign: "center", mt: 4 }}>
+          No user information available. Please <Link href="/login">log in</Link> to access your profile.
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="sm" sx={{ mt: 6 }}>
@@ -55,12 +70,13 @@ const ProfilePage = () => {
             backgroundColor: "#2196f3",
             fontSize: "2rem",
           }}
+          src={userData?.avatarUrl || "default-avatar-url.png"} // Use a fallback image URL here
         >
-          {userData.name?.charAt(0).toUpperCase()}
+          {getUserField(userData.name?.charAt(0).toUpperCase(), "U")}
         </Avatar>
         <CardContent>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            {userData.name || "User Name"}
+          <Typography variant="h5" sx={{ fontWeight: 600, fontSize: { xs: "1.5rem", sm: "2rem" } }}>
+            {getUserField(userData.name, "User Name")}
           </Typography>
 
           <Grid container spacing={1} sx={{ mt: 2 }}>
@@ -68,7 +84,7 @@ const ProfilePage = () => {
             <Grid item xs={12}>
               <Typography variant="body1" sx={{ display: "flex", alignItems: "center", color: "gray" }}>
                 <Email sx={{ mr: 1 }} />
-                {userData.email || "Not Available"}
+                {getUserField(userData.email, "Not Available")}
               </Typography>
             </Grid>
 
@@ -76,7 +92,7 @@ const ProfilePage = () => {
             <Grid item xs={12}>
               <Typography variant="body1" sx={{ display: "flex", alignItems: "center", color: "gray" }}>
                 <DateRange sx={{ mr: 1 }} />
-                {userData.birthdate || "Not Provided"}
+                {getUserField(userData.birthdate, "Not Provided")}
               </Typography>
             </Grid>
 
@@ -84,7 +100,7 @@ const ProfilePage = () => {
             <Grid item xs={12}>
               <Typography variant="body1" sx={{ display: "flex", alignItems: "center", color: "gray" }}>
                 <Accessibility sx={{ mr: 1 }} /> {/* Using Accessibility icon for gender */}
-                {userData.gender || "Not Specified"}
+                {getUserField(userData.gender, "Not Specified")}
               </Typography>
             </Grid>
 
@@ -92,12 +108,23 @@ const ProfilePage = () => {
             <Grid item xs={12}>
               <Typography variant="body1" sx={{ display: "flex", alignItems: "center", color: "gray" }}>
                 <Phone sx={{ mr: 1 }} />
-                {userData.phone_number || "Not Verified"}
+                {getUserField(userData.phone_number, "Not Verified")}
               </Typography>
             </Grid>
           </Grid>
         </CardContent>
       </Card>
+
+      {/* Edit Profile Button */}
+      {(!userData.email || !userData.phone_number) && (
+        <Box sx={{ mt: 3, textAlign: "center" }}>
+          <Typography variant="body1" color="textSecondary">
+            Some details are missing. Please <Link href="/profile/edit">update your profile</Link>.
+          </Typography>
+        </Box>
+      )}
+
+     
     </Container>
   );
 };

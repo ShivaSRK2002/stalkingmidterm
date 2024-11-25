@@ -1,36 +1,41 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { decryptToken } from './authUtils';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { decryptToken } from "./authUtils";
 const TargetCallbackHandler = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        // Extract the JWT token from the URL hash
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const idToken = hashParams.get('id_token'); // Get the ID token (JWT)
-        console.log(idToken);
+  useEffect(() => {
+    // Extract the JWT token from the URL hash
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    for (const [key, value] of hashParams.entries()) {
+      console.log(`${key}: ${value}`);
+    }
 
-        if (idToken) {
-            // Store the encrypted token in a secure cookie
-            sessionStorage.setItem("jwt", idToken);
+    const idToken = hashParams.get("id_token");
+    const refreshToken = hashParams.get("#refresh_token");
 
-            const token = decryptToken(idToken);
+    if (idToken) {
+      // Store the encrypted token in a secure cookie
+      sessionStorage.setItem("jwt", idToken);
+      sessionStorage.setItem("refreshToken", refreshToken);
 
-            const payload = JSON.parse(atob(token.split('.')[1]));
+      const token = decryptToken(idToken);
 
-            sessionStorage.setItem("userName", payload.sub);
-            
-            // Clear the URL hash to remove the token from the URL
-            window.history.replaceState(null, null, window.location.pathname);
+      const payload = JSON.parse(atob(token.split(".")[1]));
 
-            // Redirect to the main page of the target application
-            navigate('/HomePage');
-        } else {
-            console.error('Error: Invalid token format or no token found in URL');
-        }
-    }, [navigate]);
+      sessionStorage.setItem("userName", payload.sub);
 
-    return <div>Redirecting...</div>;
+      // Clear the URL hash to remove the token from the URL
+      window.history.replaceState(null, null, window.location.pathname);
+
+      // Redirect to the main page of the target application
+      navigate("/home");
+    } else {
+      console.error("Error: Invalid token format or no token found in URL");
+    }
+  }, [navigate]);
+
+  return <div>Redirecting...</div>;
 };
 
 export default TargetCallbackHandler;
