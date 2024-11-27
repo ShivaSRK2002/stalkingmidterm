@@ -4,7 +4,8 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ComplaintOverview from './ComplaintOverview';
 import IncidentDetails from './IncidentDetails';
 import ComplainantInformation from './ComplainantInformation';
@@ -162,14 +163,14 @@ const ComplaintMultiForm = () => {
 
       await handleFileUploads(complaintId);
 
-      alert('Complaint submitted and files uploaded successfully!');
+      toast.success('Complaint submitted and files uploaded successfully!');
 
       await sendEmail(false);
 
       navigate('/user-cases');
     } catch (error) {
       console.error('Error during complaint submission:', error);
-      alert('There was an error submitting the complaint.');
+      toast.error('There was an error submitting the complaint.');
     } finally {
       setLoading(false);
     }

@@ -54,6 +54,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ImageIcon from '@mui/icons-material/Image';
 import { generateFIRCopy } from './generateFIRCopy';
 import DownloadIcon from '@mui/icons-material/Download';
+import CaseStatusDynamic from './InvestigatorDetailsModal';
 
 const UserCases = () => {
   const [cases, setCases] = useState([]);
@@ -71,6 +72,7 @@ const UserCases = () => {
   const casesPerPage = 6; // Number of cases per page
   const jwtToken = sessionStorage.getItem('jwt');
   const token = decryptToken(jwtToken);
+
   const [isChatOpen, setIsChatOpen] = useState(false); // State to toggle the chat
   const [selectedPoliceId, setSelectedPoliceId] = useState(null);
 
@@ -81,53 +83,53 @@ const UserCases = () => {
     setSelectedComplaint(complaint); // Set the selected complaint
     setOpenInvestigatorModal(true); // Open the modal
   };
-  
-    const [evidences, setEvidences] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-  
-    useEffect(() => {
-      const fetchEvidences = async () => {
-        const encryptedToken = sessionStorage.getItem('jwt');
-        if (!encryptedToken) {
-          console.error('Authorization token not found');
-          return;
-        }
-  
-        const token = decryptToken(encryptedToken);
-        if (selectedCase) {
-          setIsLoading(true); // Start loading
-          try {
-            const payload = {
-              body: {
-                folderName: `${selectedCase.complaintid}`,
+
+  const [evidences, setEvidences] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchEvidences = async () => {
+      const encryptedToken = sessionStorage.getItem('jwt');
+      if (!encryptedToken) {
+        console.error('Authorization token not found');
+        return;
+      }
+
+      const token = decryptToken(encryptedToken);
+      if (selectedCase) {
+        setIsLoading(true); // Start loading
+        try {
+          const payload = {
+            body: {
+              folderName: `${selectedCase.complaintid}`,
+            },
+          };
+          const response = await axios.post(
+            process.env.REACT_APP_S3_GET_FILE_API,
+            payload,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
               },
-            };
-            const response = await axios.post(
-              process.env.REACT_APP_S3_GET_FILE_API,
-              payload,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
-  
-            const responseBody = JSON.parse(response.data.body);
-            const files = responseBody.files || [];
-            setEvidences(files); // Update evidence state
-          } catch (error) {
-            console.error('Error fetching evidences:', error);
-            setEvidences([]);
-          } finally {
-            setIsLoading(false); // Stop loading
-          }
+            }
+          );
+
+          const responseBody = JSON.parse(response.data.body);
+          const files = responseBody.files || [];
+          setEvidences(files); // Update evidence state
+        } catch (error) {
+          console.error('Error fetching evidences:', error);
+          setEvidences([]);
+        } finally {
+          setIsLoading(false); // Stop loading
         }
-      };
-  
-      if (selectedCase) fetchEvidences(); // Trigger evidence fetching when a case is selected
-    }, [selectedCase]);
-  
+      }
+    };
+
+    if (selectedCase) fetchEvidences(); // Trigger evidence fetching when a case is selected
+  }, [selectedCase]);
+
   const navigate = useNavigate();
   //const token ="eyJraWQiOiJPMGgyenNCR2lacnlSTzBkNklqdDI1SzdteldpREJKejdhK0lBV2R6XC9yVT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI3OGYxZDNmMC05MGMxLTcwOTMtOWYxZi05OGNlNzc0ZjY0ZTgiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYmlydGhkYXRlIjoiMjAwMi0xMC0yMCIsImdlbmRlciI6Im1hbGUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0yLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMl9RUHVKZk9hRmMiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOmZhbHNlLCJjb2duaXRvOnVzZXJuYW1lIjoiNzhmMWQzZjAtOTBjMS03MDkzLTlmMWYtOThjZTc3NGY2NGU4Iiwib3JpZ2luX2p0aSI6IjU1MmFkN2E3LTYwMjctNDE5OC04MTQ5LTczODUxZDRmMjFkOSIsImF1ZCI6IjJtbnYxN3ZvYTdlOHE2YmFubGcwajBxdGgiLCJldmVudF9pZCI6ImM0MzlkOGE3LTVhZTctNGU0OS1iNDAwLTQxNDQ0YTkxNjMzZiIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMyNDIyODMzLCJuYW1lIjoiU2hpdmEgUmFtYWtyaXNobmFuIiwicGhvbmVfbnVtYmVyIjoiKzkxODgyNTc5MjI2NSIsImV4cCI6MTczMjUwOTIzMywiY3VzdG9tOnJvbGUiOiJ1c2VyIiwiaWF0IjoxNzMyNDIyODMzLCJqdGkiOiI4MWExMDJlNi1iMjA2LTQxNmEtYjg5MS1kYWEzY2ZiMWEyOTIiLCJlbWFpbCI6InNoaXZhcmFtYWtyc2hubkBnbWFpbC5jb20ifQ.q4RJ4Ri0zU34Qbb9yGGz-F3tvozRQI1kUSKbxnWoMxtNyl6GuT1vzrbHrcgSyo8PsZLpusGeZtBKTAbEICwvr6ZBGpNyQsoEMMZx1t0P6Z5i3AD6at9x8OOBpbGB1bvo9uKw0PLUtrz0B81qc13jngXVbH-EP8g1uIBZQD7XBAVLFwFtyRNegsxgafeY8-vTmAXm6nf_owp2FCjN0M6uWMxE1Q6rmqhMvj7gdhNvB3K_Jrh6umeP8A5uTXDzjOkqh_TPmftrC6jGheGYMSJ9epesMe4dfL03lKVcm52DPubdXVsbBIeIGCjCmQrqMqrS3c_3Lpy22p-O6FSDkiAP_g"; // Replace with actual token
   const categoryid = 24; // Replace with actual category ID
@@ -197,7 +199,7 @@ const UserCases = () => {
     setSelectedPoliceId(policeId);
     setIsChatOpen(true); // Open the chat widget
   };
- 
+
 
 
   const handleChatClose = () => {
@@ -211,7 +213,7 @@ const UserCases = () => {
   };
   const handleScheduleMeeting = (caseId) => {
     navigate(`/meetings/${caseId}`);
-};
+  };
 
   const handleWithdraw = async () => {
     if (!withdrawReason.trim()) {
@@ -259,7 +261,7 @@ const UserCases = () => {
       alert('An error occurred while withdrawing the complaint. Please try again.');
     }
   };
-  
+
 
   const handleStatusDetails = (caseItem) => {
     setSelectedCase(caseItem); // Set the selected case data
@@ -267,7 +269,8 @@ const UserCases = () => {
   };
 
   const handleClose = () => {
-    setOpen(false); // Close the modal
+    setOpen(false);
+    setSelectedCase(null); // Close the modal
   };
   const handleViewDetails = (caseItem) => {
     setSelectedCase(caseItem);
@@ -361,10 +364,10 @@ const UserCases = () => {
 
       {/* Loading Indicator */}
       {loading && (
-  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-    <CircularProgress color="primary" />
-  </Box>
-)}
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+          <CircularProgress color="primary" />
+        </Box>
+      )}
       {/* Display Cases */}
       <Grid container spacing={4}>
         {currentCases.length > 0 ? (
@@ -419,7 +422,7 @@ const UserCases = () => {
                       <IconButton
                         size="small"
                         color="primary"
-                        onClick={() => handleChatOpen(caseItem.policeId,userid)}
+                        onClick={() => handleChatOpen(caseItem.policeId, userid)}
                       >
                         <ChatIcon />
                       </IconButton>
@@ -428,8 +431,8 @@ const UserCases = () => {
                       <IconButton
                         size="small"
                         color="success"
-                        onClick={()=>handleScheduleMeeting(caseItem.caseId)}
-                        >
+                        onClick={() => handleScheduleMeeting(caseItem.caseId)}
+                      >
                         <VideoCallIcon />
                       </IconButton>
                     </Tooltip>
@@ -456,33 +459,33 @@ const UserCases = () => {
                   >
                     Details
                   </Button>
-                  
-                  <Button
-  size="small"
-  variant="outlined"
-  startIcon={<DownloadIcon />}
-  onClick={() => generateFIRCopy(caseItem)}
->
-  Download FIR
-</Button>
-                  <Button
-        size="small"
-        variant="outlined"
-        startIcon={<BadgeIcon />}
-        onClick={() => handleOpenModal(caseItem)} // Opens the modal when clicked
-      >
-        Investigator
-      </Button>
 
-      {/* InvestigatorDetailsModal */}
-      {openInvestigatorModal && selectedComplaint && (
-        <InvestigatorDetailsModal
-          complaint={selectedComplaint} // Pass only the selected complaint
-          openInvestigatorModal={openInvestigatorModal} // Modal visibility state
-          setOpenInvestigatorModal={setOpenInvestigatorModal} // Function to close modal
-          token={token} // Authorization token
-        />
-      )}
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<DownloadIcon />}
+                    onClick={() => generateFIRCopy(caseItem)}
+                  >
+                    Download FIR
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<BadgeIcon />}
+                    onClick={() => handleOpenModal(caseItem)} // Opens the modal when clicked
+                  >
+                    Investigator
+                  </Button>
+
+                  {/* InvestigatorDetailsModal */}
+                  {openInvestigatorModal && selectedComplaint && (
+                    <InvestigatorDetailsModal
+                      complaint={selectedComplaint} // Pass only the selected complaint
+                      openInvestigatorModal={openInvestigatorModal} // Modal visibility state
+                      setOpenInvestigatorModal={setOpenInvestigatorModal} // Function to close modal
+                      token={token} // Authorization token
+                    />
+                  )}
 
                   {/* Status Button */}
                   <Button
@@ -494,6 +497,49 @@ const UserCases = () => {
                   >
                     Status
                   </Button>
+
+
+
+                  {/* Modal */}
+                  <Modal
+                    open={open}
+                    onClose={handleClose}
+                    closeAfterTransition
+                    BackdropComponent={Backdrop}
+                    BackdropProps={{
+                      timeout: 500,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 500,
+                        minHeight: 300,
+                        bgcolor: 'background.paper',
+                        borderRadius: 2,
+                        boxShadow: 24,
+                        p: 5,
+                        overflow: 'auto',
+                      }}
+                    >
+                      {selectedCase ? (
+                        <>
+                          {/* Pass only the selected case to the Stepper */}
+                          {console.log("Rendering CaseStatusStepper with selectedCase:", selectedCase)}
+                          <CaseStatusStepper caseStatus={selectedCase.casestatus} />
+                        </>
+                      ) : (
+                        <Typography variant="body1">Loading case details...</Typography>
+                      )}
+                    </Box>
+                  </Modal>
+
+
+
+
 
                   {/* Withdrawn or Withdraw Button */}
                   {caseItem.iswithdrawn ? (
@@ -515,10 +561,11 @@ const UserCases = () => {
               </Paper>
             </Grid>
           ))
+
         ) : (
           <Grid item xs={12}>
             <Typography variant="h6" color="textSecondary" textAlign="center">
-              
+
             </Typography>
           </Grid>
         )}
@@ -526,7 +573,7 @@ const UserCases = () => {
 
       {/* Conditionally Render ChatWidget */}
       {isChatOpen && selectedPoliceId && (
-        <div style={{zIndex: 1000 }}>
+        <div style={{ zIndex: 1000 }}>
           <ChatWidget
             userid={userid}
             policeId={selectedPoliceId}
@@ -581,37 +628,7 @@ const UserCases = () => {
         </Fade>
       </Modal>
 
-      <Modal
-      open={open}
-      onClose={handleClose}
-      closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 500, // Increased width
-          minHeight: 300, // Added minHeight for vertical spacing
-          bgcolor: 'background.paper',
-          borderRadius: 2,
-          boxShadow: 24,
-          p: 5, // Increased padding for more internal spacing
-          overflow: 'auto', // Ensure content does not overflow outside the box
-        }}
-      >
-        {selectedCase ? (
-          <CaseStatusStepper activeStep={selectedCase.statusStep || 0} />
-        ) : (
-          <Typography variant="body1">Loading case details...</Typography>
-        )}
-      </Box>
-    </Modal>
+
 
       {/* details */}
       <Dialog open={openDetailsModal} onClose={() => setOpenDetailsModal(false)} maxWidth="sm" fullWidth>
@@ -664,39 +681,39 @@ const UserCases = () => {
               {renderWitnesses(selectedCase.individualdetails?.witnesses)}
               <Divider sx={{ my: 2 }} />
 
-            {/* Evidence Section */}
-            <Typography variant="h6" fontWeight="bold" sx={{ color: '#2c3e50', mt: 3, mb: 2, textDecoration: 'underline' }}>
-              Evidence Details
-            </Typography>
-            {isLoading ? (
-              <Typography sx={{ color: '#7f8c8d', mb: 2 }}>
-                Loading evidence...
+              {/* Evidence Section */}
+              <Typography variant="h6" fontWeight="bold" sx={{ color: '#2c3e50', mt: 3, mb: 2, textDecoration: 'underline' }}>
+                Evidence Details
               </Typography>
-            ) : evidences.length > 0 ? (
-              <ul style={{ paddingLeft: '20px', color: '#7f8c8d' }}>
-                {evidences.map((evidence, index) => (
-                  <li key={index} style={{ marginBottom: '10px' }}>
-                    {evidence.fileName.endsWith('.pdf') ? (
-                      <PictureAsPdfIcon style={{ marginRight: '8px', color: '#e74c3c' }} />
-                    ) : (
-                      <ImageIcon style={{ marginRight: '8px', color: '#3498db' }} />
-                    )}
-                    <a
-                      href={evidence.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: '#3498db', textDecoration: 'none' }}
-                    >
-                      {evidence.fileName || `Evidence ${index + 1}`}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Typography sx={{ color: '#e74c3c', mb: 2 }}>
-                No evidence provided for this case.
-              </Typography>
-            )}
+              {isLoading ? (
+                <Typography sx={{ color: '#7f8c8d', mb: 2 }}>
+                  Loading evidence...
+                </Typography>
+              ) : evidences.length > 0 ? (
+                <ul style={{ paddingLeft: '20px', color: '#7f8c8d' }}>
+                  {evidences.map((evidence, index) => (
+                    <li key={index} style={{ marginBottom: '10px' }}>
+                      {evidence.fileName.endsWith('.pdf') ? (
+                        <PictureAsPdfIcon style={{ marginRight: '8px', color: '#e74c3c' }} />
+                      ) : (
+                        <ImageIcon style={{ marginRight: '8px', color: '#3498db' }} />
+                      )}
+                      <a
+                        href={evidence.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#3498db', textDecoration: 'none' }}
+                      >
+                        {evidence.fileName || `Evidence ${index + 1}`}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <Typography sx={{ color: '#e74c3c', mb: 2 }}>
+                  No evidence provided for this case.
+                </Typography>
+              )}
             </Paper>
           )}
         </DialogContent>
