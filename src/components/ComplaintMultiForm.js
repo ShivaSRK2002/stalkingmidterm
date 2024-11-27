@@ -27,13 +27,12 @@ const steps = [
 const ComplaintMultiForm = () => {
   const navigate = useNavigate();
   const [isStepValid, setStepValid] = useState(false);
-  const jwtToken = sessionStorage.getItem('jwt');  
-  const token = decryptToken(jwtToken);
+ 
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     categoryid: 24,
     userid: '78f1d3f0-90c1-7093-9f1f-98ce774f64e8',
-    policeid: 'a8215370-90c1-70d7-18f5-253a52976629',
+    policeid: '08f19300-c001-7067-3327-d85a96116731',
     reasonforwithdrawal: null,
     iswithdrawalaccepted: 0,
     iswithdrawn: 0,
@@ -141,6 +140,8 @@ const ComplaintMultiForm = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      const jwtToken = sessionStorage.getItem('jwt');  
+      const token = decryptToken(jwtToken);
       const apiUrl = 'https://x4xn6amqo2.execute-api.eu-west-2.amazonaws.com/UserComplaints';
       const payload = {
         ...formData,
@@ -173,16 +174,17 @@ const ComplaintMultiForm = () => {
       setLoading(false);
     }
   };
+  
 
   const sendEmail = async (withPdf) => {
-    const hardcodedEmail = "shivaramakrshnn@gmail.com"; // Replace with your hardcoded email address
+    //const hardcodedEmail = "shivaramakrshnn@gmail.com"; // Replace with your hardcoded email address
   
     const emailApiUrl = withPdf
       ? 'https://8wy1xykpmk.execute-api.us-east-2.amazonaws.com/dev/withPdf'
       : 'https://8wy1xykpmk.execute-api.us-east-2.amazonaws.com/dev/withoutPdf';
   
     const payload = {
-      recipient_email: hardcodedEmail,
+      recipient_email: formData.individualdetails.emailAddress,
       subject: 'Complaint Registration Confirmation',
       message_body: `Hello, your complaint has been successfully registered.`,
     };
@@ -192,6 +194,8 @@ const ComplaintMultiForm = () => {
     console.log("Payload:", payload);
   
     try {
+      const jwtToken = sessionStorage.getItem('jwt');  
+      const token = decryptToken(jwtToken);
       const response = await axios.post(emailApiUrl, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -199,7 +203,50 @@ const ComplaintMultiForm = () => {
     } catch (error) {
       console.error('Error sending email:', error.response ? error.response.data : error.message);
     }
+    const whatsappPayload = {
+      "to": `+91${formData.individualdetails.phonenumber}`,
+      "message": "You have successfully filed a case on the Drug Division portal of DiGiPo."
+    }
+    const jwtToken = sessionStorage.getItem('jwt');  
+    const token = decryptToken(jwtToken);
+    const apiResponse = await axios.post(
+      process.env.REACT_APP_WHATSAPP_URL,
+      whatsappPayload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+         },
+      }
+    );
+
+    console.log(apiResponse);
+    try{
+      const snsPayload = {
+        "phone_number": `+91${formData.phone_number}`,
+        "message": "You have successfully filed a case on the Drug Division portal of DiGiPo."
+      }
+
+      const snsApiResponse = await axios.post(
+        process.env.REACT_APP_SNS_URL,
+        snsPayload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+           },
+        }
+      );
+
+      console.log(snsApiResponse);
+
+    }
+    catch (error) {
+      console.error("Error sending SMS", error);
+  }
   };
+
+  
   
 
   const renderStep = (step) => {

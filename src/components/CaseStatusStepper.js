@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react'; // Import useState
 import { styled } from '@mui/material/styles';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
@@ -10,6 +10,9 @@ import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import CloseIcon from '@mui/icons-material/Close';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import LinearProgress from '@mui/material/LinearProgress';
+import Typography from '@mui/material/Typography';
 
 // Custom connector for the steps
 const CustomConnector = styled(StepConnector)(({ theme }) => ({
@@ -71,24 +74,43 @@ function CustomStepIcon(props) {
 
 // Case status steps
 const steps = [
-  'Complaint Registered',
-  'Verification in Progress',
-  'Investigation Ongoing',
-  'Action Taken',
-  'Case Closed',
+  { label: 'Complaint Registered', percentage: 20 },
+  { label: 'Verification in Progress', percentage: 40 },
+  { label: 'Investigation Ongoing', percentage: 60 },
+  { label: 'Action Taken', percentage: 80 },
+  { label: 'Case Closed', percentage: 100 },
 ];
 
-export default function CaseStatusStepper({ activeStep = 0 }) {
+export default function CaseStatusStepper({ activeStep = 0, onClose }) {
+  const currentStep = steps[activeStep] || { percentage: 0 };
+
   return (
     <Box sx={{ width: '100%', mt: 4 }}>
+      {/* Header with close button */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">Case Progress</Typography>
+        
+      </Box>
+
+      {/* Progress bar */}
+      <LinearProgress
+        variant="determinate"
+        value={currentStep.percentage}
+        sx={{ height: 10, borderRadius: 5, mb: 2 }}
+      />
+      <Typography variant="body2" align="right">
+        {currentStep.percentage}% Completed
+      </Typography>
+
+      {/* Stepper */}
       <Stepper
         alternativeLabel
         activeStep={activeStep}
         connector={<CustomConnector />}
       >
-        {steps.map((label, index) => (
+        {steps.map((step, index) => (
           <Step key={index}>
-            <StepLabel StepIconComponent={CustomStepIcon}>{label}</StepLabel>
+            <StepLabel StepIconComponent={CustomStepIcon}>{step.label}</StepLabel>
           </Step>
         ))}
       </Stepper>

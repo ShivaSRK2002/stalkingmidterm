@@ -51,7 +51,7 @@ const ComplaintOverview = ({ setStepValid }) => {
       </Grid>
 
       <Box sx={{ marginTop: "20px", textAlign: "center" }}>
-        <Button
+        {/* <Button
           variant="contained"
           color="primary"
           disabled={!isAgreed}
@@ -63,7 +63,7 @@ const ComplaintOverview = ({ setStepValid }) => {
           }}
         >
           Confirm and Proceed
-        </Button>
+        </Button> */}
       </Box>
 
       {/* Legal Disclaimer */}

@@ -12,7 +12,8 @@ import MapPage from './components/MapPage';
 import ChatWidget from './components/ChatApp';
 import { checkAuthorization, logout } from './authUtils'; // Ensure this utility exists
 import AboutPage from './components/AboutPage';
-
+import Meeting from './components/Meeting';
+import JoinMeeting from './components/joinMeet';
 // Routes Component
 const AppRoutes = ({ complaints, handleLoading, handleSubmitComplaint }) => (
   <Routes>
@@ -30,6 +31,8 @@ const AppRoutes = ({ complaints, handleLoading, handleSubmitComplaint }) => (
       <Route path="/chat" element={<ChatWidget />} />
     <Route path="/complaint-list" element={<ComplaintList complaints={complaints} />} />
     <Route path="/user-cases" element={<UserCases />} />
+    <Route path="/meetings/:caseId" element={<Meeting />} />
+    <Route path="/joinmeeting/:meetingId" element={<JoinMeeting />} />
     <Route path="/profile" element={<ProfilePage />} />
     <Route path="/map" element={<MapPage />} />
     <Route path="/about" element={<AboutPage />} />

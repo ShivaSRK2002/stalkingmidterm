@@ -184,7 +184,25 @@ const IncidentDetails = ({ prevStep, nextStep, updateFormData, formData, setStep
           />
         </Grid>
 
-        
+        {/* Action Buttons */}
+        <Grid item xs={12} container justifyContent="space-between">
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={prevStep}
+            style={{ marginTop: '20px' }}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleNext}
+            style={{ marginTop: '20px' }}
+          >
+            Next
+          </Button>
+        </Grid>
       </Grid>
     </Box>
   );

@@ -111,7 +111,7 @@ const Footer = () => {
                             { icon: <Twitter />, url: 'https://twitter.com' },
                             { icon: <Instagram />, url: 'https://instagram.com' },
                             { icon: <LinkedIn />, url: 'https://linkedin.com' },
-                            { icon: <GitHub />, url: 'https://github.com' },
+                           
                         ].map((social, index) => (
                             <IconButton
                                 key={index}

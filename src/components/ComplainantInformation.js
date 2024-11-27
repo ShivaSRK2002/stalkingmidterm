@@ -12,6 +12,8 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
   const individualDetails = formData.individualdetails || {};
   const [errors, setErrors] = useState({}); // Track validation errors
 
+  console.log(individualDetails)
+
   const handleChange = (field, value) => {
     updateFormData({ [field]: value });
   };

@@ -1,16 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import websocketService from "./websocketService";
 import { fetchMessageHistory } from "./messageService";
+import {
+  Box,
+  Typography,
+  IconButton,
+  TextField,
+  Button,
+  Paper,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Avatar,
+  CircularProgress,
+  Stack,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import SendIcon from "@mui/icons-material/Send";
 
-const ChatWidget = ({userid , policeId , onClose}) => {
-  const location = useLocation();
+const ChatWidget = ({ userid, policeId, onClose }) => {
   const navigate = useNavigate();
-  // const { userid, policeId } = location.state || {};
-
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
-  const [lastEvaluatedKey, setLastEvaluatedKey] = useState(null);
+  const [loading, setLoading] = useState(false);
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
@@ -21,20 +35,22 @@ const ChatWidget = ({userid , policeId , onClose}) => {
     }
 
     const loadHistory = async () => {
-      const { messages: history, lastEvaluatedKey: newKey } = await fetchMessageHistory(
-        userid,
-        policeId,
-        lastEvaluatedKey
-      );
+      setLoading(true);
+      try {
+        const { messages: history } = await fetchMessageHistory(userid, policeId);
 
-      const parsedHistory = history.map((msg) => ({
-        ...msg,
-        isSent: msg.senderId === userid,
-      }));
+        const parsedHistory = history.map((msg) => ({
+          ...msg,
+          isSent: msg.senderId === userid,
+        }));
 
-      setMessages((prevMessages) => [...parsedHistory, ...prevMessages]);
-      setLastEvaluatedKey(newKey);
-      scrollToBottom();
+        setMessages(parsedHistory);
+        scrollToBottom();
+      } catch (error) {
+        console.error("Error loading chat history:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadHistory();
@@ -59,13 +75,12 @@ const ChatWidget = ({userid , policeId , onClose}) => {
         receiverId: policeId,
         content: inputMessage,
         timestamp: new Date().toISOString(),
-        read: false,
       };
 
       websocketService.sendMessage(messageData);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { ...messageData, isSent: true, read: false },
+        { ...messageData, isSent: true },
       ]);
       setInputMessage("");
       scrollToBottom();
@@ -83,143 +98,153 @@ const ChatWidget = ({userid , policeId , onClose}) => {
   };
 
   return (
-    <div
-      style={{
+    <Paper
+      elevation={8}
+      sx={{
         position: "fixed",
-        bottom: "20px",
-        right: "20px",
+        bottom: 20,
+        right: 20,
         width: "100%",
-        maxWidth: "400px",
-        height: "500px",
-        backgroundColor: "#ECE5DD", // WhatsApp's background color
-        borderRadius: "20px",
-        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+        maxWidth: 350, // Smaller width
+        height: 450, // Reduced height
+        borderRadius: 3,
         display: "flex",
         flexDirection: "column",
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        overflow: "hidden",
       }}
     >
       {/* Header */}
-      <div
-        style={{
-          padding: "12px 15px",
-          background: "linear-gradient(90deg, #075E54, #128C7E)", // WhatsApp green gradient
-          color: "#fff",
+      <Box
+        sx={{
+          backgroundColor: "#1976d2",
+          color: "white",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderRadius: "20px 20px 0 0",
+          padding: "10px 14px",
         }}
       >
-        <span style={{ fontWeight: "bold", fontSize: "16px" }}>Chat</span>
-        <button
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "#fff",
-            cursor: "pointer",
-            fontSize: "16px",
-          }}
-          onClick={() => onClose()}
-        >
-          ✖
-        </button>
-      </div>
+        <Typography variant="h6" fontWeight="bold">
+          Police Chat
+        </Typography>
+        <IconButton size="small" color="inherit" onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
 
-      {/* Chat Messages */}
-      <div
-        style={{
+      {/* Messages */}
+      <Box
+        sx={{
           flex: 1,
           overflowY: "auto",
-          padding: "10px",
-          backgroundColor: "#ECE5DD", // Light beige background
+          padding: 1,
+          backgroundColor: "#f9f9f9",
         }}
       >
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            style={{
-              display: "flex",
-              justifyContent: msg.isSent ? "flex-end" : "flex-start",
-              margin: "5px 0",
-            }}
+        {loading ? (
+          <Stack
+            alignItems="center"
+            justifyContent="center"
+            sx={{ height: "100%" }}
           >
-            <div
-              style={{
-                maxWidth: "75%",
-                padding: "10px",
-                borderRadius: "15px",
-                backgroundColor: msg.isSent ? "#DCF8C6" : "#FFFFFF", // WhatsApp bubble colors
-                color: "#000",
-                wordWrap: "break-word",
-                fontSize: "14px",
-                boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <div>{msg.content}</div>
-              <div
-                style={{
-                  fontSize: "0.75em",
-                  color: "#888",
-                  textAlign: "right",
-                  marginTop: "5px",
+            <CircularProgress size={24} />
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+              Loading messages...
+            </Typography>
+          </Stack>
+        ) : (
+          <List disablePadding>
+            {messages.map((msg, index) => (
+              <ListItem
+                key={index}
+                disableGutters
+                sx={{
+                  display: "flex",
+                  justifyContent: msg.isSent ? "flex-end" : "flex-start",
+                  marginBottom: 0.5,
                 }}
               >
-                {new Date(msg.timestamp).toLocaleTimeString()}
-              </div>
-            </div>
-          </div>
-        ))}
-        <div ref={chatContainerRef} />
-      </div>
+                {!msg.isSent && (
+                  <Avatar
+                    sx={{
+                      backgroundColor: "#1976d2",
+                      color: "white",
+                      marginRight: 1,
+                      width: 28,
+                      height: 28, // Smaller avatar
+                    }}
+                  >
+                    U
+                  </Avatar>
+                )}
+                <Box
+                  sx={{
+                    maxWidth: "70%",
+                    padding: "8px 12px", // Compact padding
+                    borderRadius: 2,
+                    backgroundColor: msg.isSent ? "#e3f2fd" : "white",
+                    boxShadow: 1,
+                    wordBreak: "break-word",
+                    fontSize: "14px", // Smaller font size
+                  }}
+                >
+                  <ListItemText
+                    primary={msg.content}
+                    secondary={new Date(msg.timestamp).toLocaleTimeString()}
+                    primaryTypographyProps={{
+                      variant: "body2",
+                      color: "textPrimary",
+                    }}
+                    secondaryTypographyProps={{
+                      variant: "caption",
+                      align: "right",
+                    }}
+                  />
+                </Box>
+              </ListItem>
+            ))}
+            <div ref={chatContainerRef} />
+          </List>
+        )}
+      </Box>
 
-      {/* Input Box */}
-      <div
-        style={{
+      {/* Input Area */}
+      <Divider />
+      <Box
+        sx={{
           display: "flex",
-          padding: "10px",
-          backgroundColor: "#FFFFFF",
-          borderTop: "1px solid #ddd",
-          borderRadius: "0 0 20px 20px",
+          alignItems: "center",
+          padding: "8px",
+          backgroundColor: "#fff",
         }}
       >
-        <input
-          type="text"
+        <TextField
+          fullWidth
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="Type a message"
-          style={{
-            flex: 1,
-            padding: "10px",
-            border: "none",
-            borderRadius: "20px",
-            outline: "none",
-            fontSize: "14px",
-            marginRight: "10px",
-            backgroundColor: "#F0F0F0", // Lighter input box background
-            boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
+          placeholder="Type a message..."
+          size="small"
+          variant="outlined"
+          sx={{
+            marginRight: 1,
+            backgroundColor: "#f9f9f9",
           }}
         />
-        <button
+        <Button
+          variant="contained"
+          color="primary"
           onClick={handleSendMessage}
-          style={{
-            padding: "10px 15px",
-            backgroundColor: "#25D366", // WhatsApp green send button
-            color: "#fff",
-            border: "none",
-            borderRadius: "50%",
-            cursor: "pointer",
-            fontSize: "16px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+          disabled={!inputMessage.trim()}
+          sx={{
+            minWidth: 40, // Smaller button
+            minHeight: 40,
           }}
         >
-          ➤
-        </button>
-      </div>
-    </div>
+          <SendIcon />
+        </Button>
+      </Box>
+    </Paper>
   );
 };
 

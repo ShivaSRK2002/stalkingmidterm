@@ -113,38 +113,6 @@ console.log(investigatorDetails)
                   <strong>Email:</strong> {investigator[0].email}
                 </Typography>
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      // Trigger chat initiation logic here
-                      handleCloseModals();
-                    }}
-                    sx={{
-                      textTransform: 'none',
-                      px: 4,
-                      py: 1.5,
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    Initiate Chat
-                  </Button>
-
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    sx={{
-                      textTransform: 'none',
-                      px: 4,
-                      py: 1.5,
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    Start Video Call
-                  </Button>
-                </Box>
-
                 <Button
                   variant="outlined"
                   color="primary"
@@ -159,7 +127,7 @@ console.log(investigatorDetails)
                 </Button>
               </Box>
             ) : (
-              <Typography variant="body1" sx={{ textAlign: 'center', mt: 3, fontStyle: 'italic' }}>
+              <Typography variant="body1" sx={{ textAlign: 'center', mt: 3, fontStyle: 'arial' }}>
                 Loading investigator details...
               </Typography>
             )}
