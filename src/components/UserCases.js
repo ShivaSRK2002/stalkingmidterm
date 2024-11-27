@@ -58,14 +58,14 @@ import CaseStatusDynamic from './InvestigatorDetailsModal';
 
 const UserCases = () => {
   const [cases, setCases] = useState([]);
+  const userid=sessionStorage.getItem("userName")
   const [open, setOpen] = useState(false); // Modal state
   const [filteredCases, setFilteredCases] = useState([]);
   const [error, setError] = useState(null);
   const [selectedCase, setSelectedCase] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [openDetailsModal, setOpenDetailsModal] = useState(false);
-  const [withdrawReason, setWithdrawReason] = useState('');
-  const [userid] = useState('78f1d3f0-90c1-7093-9f1f-98ce774f64e8'); // Replace with actual userId
+  const [withdrawReason, setWithdrawReason] = useState('');  
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1); // State for pagination

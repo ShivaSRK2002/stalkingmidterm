@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import * as ChimeSDK from "amazon-chime-sdk-js";
 import { useLocation } from 'react-router-dom';
- 
+import axios from "axios";
+
 import { decryptToken } from "../authUtils";
  
 function MeetingApp() {
@@ -260,7 +261,34 @@ const doMeeting = async () => {
   //   setMeetingSession(null);
   //   showMessage("Meeting ended.");
   // };
- 
+  const sendPostRequest = async (requestBody) => {
+    const apiUrl = "https://y5vdz78j10.execute-api.eu-west-1.amazonaws.com/dev/";
+    
+    // Tagged body content
+    console.log("Request Body: ", JSON.stringify(requestBody));
+    const stringifiedBody = JSON.stringify({
+        body: JSON.stringify(requestBody)
+    });
+    try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: stringifiedBody
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+  
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.error("Error during POST request:", error);
+      }
+
+}
   const stopMeeting = () => {
     if (!meetingSession) return;
  
@@ -294,17 +322,61 @@ const doMeeting = async () => {
             MEDIA_PIPELINE_ID: window.mediaPipelineId,
           }),
         });
- 
-        const data = await response.json();
-        console.log("Stop Recording Response:", data);
- 
+        const concatenationResponse1 = await response.json();
+        console.log("Stop Recording Response:", concatenationResponse1);
+
+// Extract the `concatenationResponse` field
+const concatenationResponse = concatenationResponse1.body
+  ? JSON.parse(concatenationResponse1.body).concatenationResponse
+  : null; // Ensure body is parsed only if it existsconsole.log(concatenationResponse1);
+  console.log(concatenationResponse);
+ const mediaPipelineId1=concatenationResponse.MediaConcatenationPipeline.MediaPipelineId;
+ console.log(mediaPipelineId1);
+        const getToken = () => sessionStorage.getItem("jwt");
+        const encryptedToken = getToken();
+        const token = decryptToken(encryptedToken);
+        const response1 = await axios.get(
+            "https://1yc0t7b8u5.execute-api.ca-central-1.amazonaws.com/dev/",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );    
+          const responseBody = JSON.parse(response1.data.body);
+          const responseData = Array.isArray(responseBody) ? responseBody : [];
+          const filteredData = responseData.filter(
+            (item) => item.meeting_id === meetingId
+          );
+    
+          if (filteredData.length === 0) {
+            throw new Error("No meeting found with the given meeting ID.");
+          }
+    
+          const { date, start_time, complaint_id: complaintId } =
+            filteredData[0];
+    
+          // Combine date and time for `startTime`
+          const startTime = `${date}T${start_time}`;
+    
+     
+
+      // Step 3: Construct requestBody for the Lambda function API
+      const requestBody = {
+    meetingId: meetingId,          // Ensure meetingId is correctly set
+    startTime: startTime,          // Ensure startTime is correctly set
+    complaintId: complaintId,      // Ensure complaintId is correctly set
+    mediaPipelineId1: mediaPipelineId1,  // Ensure mediaPipelineId1 is correctly set
+};
+          await sendPostRequest(requestBody);
         if (response.ok) {
           showMessage("Recording stopped successfully!");
           console.log("Media Pipeline ID stopped:", window.mediaPipelineId);
           setIsRecording(false);
+          
           window.mediaPipelineId = null;
         } else {
-          showMessage(`Failed to stop recording: ${data.message || "Unknown error"}`);
+          showMessage(`Failed to stop recording: ${concatenationResponse.message || "Unknown error"}`);
         }
       } catch (error) {
         console.error("Error stopping the recording:", error);

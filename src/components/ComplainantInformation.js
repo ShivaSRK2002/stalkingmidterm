@@ -22,8 +22,8 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
     const newErrors = {};
 
     // Validate Full Name
-    if (!individualDetails.fullName) {
-      newErrors.fullName = 'Full name is required';
+    if (!individualDetails.complainantName) {
+      newErrors.complainantName = 'Full name is required';
     }
 
     // Validate Address
@@ -37,8 +37,8 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
     }
 
     // Validate Email Address
-    if (individualDetails.emailAddress && !/\S+@\S+\.\S+/.test(individualDetails.emailAddress)) {
-      newErrors.emailAddress = 'Valid email is required';
+    if (individualDetails.victim_email && !/\S+@\S+\.\S+/.test(individualDetails.victim_email)) {
+      newErrors.victim_email= 'Valid email is required';
     }
 
     // Validate Identification Proof Type
@@ -83,8 +83,8 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
       {/* Full Name */}
       <TextField
         label="Full Name"
-        value={individualDetails.fullName || ''}
-        onChange={(e) => handleChange('fullName', e.target.value)}
+        value={individualDetails.complainantName || ''}
+        onChange={(e) => handleChange('complainantName', e.target.value)}
         fullWidth
         margin="normal"
         required
@@ -138,8 +138,8 @@ const ComplainantInformation = ({ prevStep, nextStep, updateFormData, formData, 
       <TextField
         label="Email Address"
         type="email"
-        value={individualDetails.emailAddress || ''}
-        onChange={(e) => handleChange('emailAddress', e.target.value)}
+        value={individualDetails.victim_email || ''}
+        onChange={(e) => handleChange('victim_email', e.target.value)}
         fullWidth
         margin="normal"
         InputProps={{

@@ -25,24 +25,24 @@ const IncidentDetails = ({ prevStep, nextStep, updateFormData, formData, setStep
   const validateFields = () => {
     const newErrors = {};
     // Validate Date (must be a valid date)
-    if (!individualDetails.incidentDate || isNaN(Date.parse(individualDetails.incidentDate))) {
-      newErrors.incidentDate = 'Valid Date of incident is required';
+    if (!individualDetails.incident_date || isNaN(Date.parse(individualDetails.incident_date))) {
+      newErrors.incident_date = 'Valid Date of incident is required';
     }
     // Validate Time (must be a valid time)
     if (!individualDetails.incidentTime) {
       newErrors.incidentTime = 'Time of incident is required';
     }
     // Validate Location (must be alphabetic)
-    if (!individualDetails.incidentLocation || !/^[a-zA-Z\s]*$/.test(individualDetails.incidentLocation)) {
-      newErrors.incidentLocation = 'Location should contain only alphabets and spaces';
+    if (!individualDetails.location || !/^[a-zA-Z\s]*$/.test(individualDetails.location)) {
+      newErrors.location = 'Location should contain only alphabets and spaces';
     }
     // Validate Nature of Stalking (must be selected)
     if (!individualDetails.natureOfStalking) {
       newErrors.natureOfStalking = 'Nature of stalking is required';
     }
     // Validate Description (should be a non-empty string)
-    if (!individualDetails.incidentDescription) {
-      newErrors.incidentDescription = 'Description of incident is required';
+    if (!individualDetails.incident_description) {
+      newErrors.incident_description = 'Description of incident is required';
     }
 
     setErrors(newErrors);
@@ -75,8 +75,8 @@ const IncidentDetails = ({ prevStep, nextStep, updateFormData, formData, setStep
           <TextField
             label="Date of Incident"
             type="date"
-            value={individualDetails.incidentDate || ''}
-            onChange={(e) => handleChange('incidentDate', e.target.value)}
+            value={individualDetails.incident_date || ''}
+            onChange={(e) => handleChange('incident_date', e.target.value)}
             fullWidth
             margin="normal"
             required
@@ -123,8 +123,8 @@ const IncidentDetails = ({ prevStep, nextStep, updateFormData, formData, setStep
         <Grid item xs={12}>
           <TextField
             label="Location of Incident"
-            value={individualDetails.incidentLocation || ''}
-            onChange={(e) => handleChange('incidentLocation', e.target.value)}
+            value={individualDetails.location || ''}
+            onChange={(e) => handleChange('location', e.target.value)}
             fullWidth
             margin="normal"
             required
@@ -165,8 +165,8 @@ const IncidentDetails = ({ prevStep, nextStep, updateFormData, formData, setStep
         <Grid item xs={12}>
           <TextField
             label="Description of Incident"
-            value={individualDetails.incidentDescription || ''}
-            onChange={(e) => handleChange('incidentDescription', e.target.value)}
+            value={individualDetails.incident_description || ''}
+            onChange={(e) => handleChange('incident_description', e.target.value)}
             fullWidth
             margin="normal"
             multiline
@@ -184,25 +184,7 @@ const IncidentDetails = ({ prevStep, nextStep, updateFormData, formData, setStep
           />
         </Grid>
 
-        {/* Action Buttons */}
-        <Grid item xs={12} container justifyContent="space-between">
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={prevStep}
-            style={{ marginTop: '20px' }}
-          >
-            Back
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleNext}
-            style={{ marginTop: '20px' }}
-          >
-            Next
-          </Button>
-        </Grid>
+       
       </Grid>
     </Box>
   );
