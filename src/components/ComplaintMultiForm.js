@@ -139,6 +139,10 @@ const ComplaintMultiForm = () => {
         ...formData,
         individualdetails: JSON.stringify(formData.individualdetails),
       };
+      delete payload.proofFile;
+      delete payload.evidenceFiles;
+      console.log("Parent formData updated:", formData);
+    
   
       const response = await axios.post(apiUrl, payload, {
         headers: {
@@ -150,7 +154,11 @@ const ComplaintMultiForm = () => {
       const responseBody = JSON.parse(response.data.body);
       const complaintId = responseBody.data?.complaintid;
   
-      if (!complaintId) throw new Error('Complaint ID not returned from the server.');
+      if (!complaintId) {
+        console.error('Complaint ID not returned from the server.');       
+        return; // Exit gracefully if `complaintId` is not available
+      }
+      
   
       await handleFileUploads(complaintId); // Assuming handleFileUploads handles the files after complaint is created.
   
@@ -253,7 +261,7 @@ DiGiPo Cyber Crime Division`,
   
     // Send SMS via SNS
     const snsPayload = {
-      phone_number: `+91${formData.individualdetails.phoneNumber}`,
+      phone_number: `${formData.individualdetails.phoneNumber}`,
       message: "You have successfully filed a case on the Drug Division portal of DiGiPo.",
     };
     try {

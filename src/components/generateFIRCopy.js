@@ -57,11 +57,11 @@ export const generateFIRCopy = async (caseItem) => {
     doc.text('Incident Details:', 20, 90);
     doc.setFontSize(11);
     doc.setTextColor(0, 0, 0); // Normal Text Color
-    doc.text(`Incident Date: ${caseItem.individualdetails?.incidentDate || 'Not Provided'}`, 20, 95);
+    doc.text(`Incident Date: ${caseItem.individualdetails?.incident_date || 'Not Provided'}`, 20, 95);
     doc.text(`Incident Time: ${caseItem.individualdetails?.incidentTime || 'Not Provided'}`, 20, 100);
-    doc.text(`Incident Location: ${caseItem.individualdetails?.incidentLocation || 'Not Provided'}`, 20, 105);
+    doc.text(`Incident Location: ${caseItem.individualdetails?.Location || 'Not Provided'}`, 20, 105);
     doc.text(`Nature of Stalking: ${caseItem.individualdetails?.natureOfStalking || 'Not Provided'}`, 20, 110);
-    doc.text(`Description: ${caseItem.individualdetails?.incidentDescription || 'Not Provided'}`, 20, 115);
+    doc.text(`Description: ${caseItem.individualdetails?.incident_description || 'Not Provided'}`, 20, 115);
 
     // Personal Information Section
     doc.setFontSize(14);
@@ -69,8 +69,8 @@ export const generateFIRCopy = async (caseItem) => {
     doc.text('Personal Information:', 20, 130);
     doc.setFontSize(11);
     doc.setTextColor(0, 0, 0); // Normal Text Color
-    doc.text(`Full Name: ${caseItem.individualdetails?.fullName || 'Not Provided'}`, 20, 135);
-    doc.text(`Email Address: ${caseItem.individualdetails?.emailAddress || 'Not Provided'}`, 20, 140);
+    doc.text(`Full Name: ${caseItem.individualdetails?.complainantName || 'Not Provided'}`, 20, 135);
+    doc.text(`Email Address: ${caseItem.individualdetails?.victim_email || 'Not Provided'}`, 20, 140);
     doc.text(`Phone Number: ${caseItem.individualdetails?.phoneNumber || 'Not Provided'}`, 20, 145);
     doc.text(`Address: ${caseItem.individualdetails?.address || 'Not Provided'}`, 20, 150);
     doc.text(`Gender: ${caseItem.individualdetails?.gender || 'Not Provided'}`, 20, 155);
@@ -81,7 +81,7 @@ export const generateFIRCopy = async (caseItem) => {
     doc.text('Investigation Details:', 20, 170);
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
-    doc.text(`Investigation Status: ${caseItem.casestatus || 'Pending'}`, 20, 180);
+    doc.text(`Investigation Status: ${caseItem.casestatus || 'Complaint Registred'}`, 20, 180);
 
     // Case Status Section
     doc.setFontSize(14);
@@ -95,7 +95,7 @@ export const generateFIRCopy = async (caseItem) => {
     //Important note about the human trafficking case
     doc.setFontSize(12);
     doc.setTextColor(255, 0, 0); // Red Text for special notes
-    doc.text('Important Note: This is a human trafficking case. Ongoing investigation is in progress to rescue the victim and apprehend the suspects.', 20, 230, { maxWidth: 180 });
+    doc.text('Important Note: This is a Stalking case. Ongoing investigation is in progress to rescue the victim and apprehend the suspects.', 20, 230, { maxWidth: 180 });
  
     // Seal - Add a circular seal at the bottom left with "DiGiPo" spelled in it
     doc.setFillColor(255, 0, 0); // Blue color for the seal (matching DiGiPo theme)

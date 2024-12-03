@@ -592,42 +592,52 @@ const UserCases = () => {
         />
       </Box>
 
-      {/* Modals */}
-      {/* Withdrawal Modal */}
       <Modal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
-      >
-        <Fade in={openModal}>
-          <Box style={{ width: 400, margin: '10% auto', backgroundColor: 'white', padding: '20px' }}>
-            <Typography variant="h6" gutterBottom>Withdraw Complaint</Typography>
-            <TextField
-              fullWidth
-              label="Reason for Withdrawal"
-              variant="outlined"
-              value={withdrawReason}
-              onChange={(e) => setWithdrawReason(e.target.value)}
-              multiline
-              rows={4}
-            />
-            <Box mt={2} display="flex" justifyContent="space-between">
-              <Button onClick={() => setOpenModal(false)}>Cancel</Button>
-              <Button
-                color="primary"
-                onClick={handleWithdraw}
-              >
-                Submit
-              </Button>
-            </Box>
+      open={openModal}
+      onClose={() => setOpenModal(false)}
+      closeAfterTransition
+      BackdropProps={{
+        style: {
+          backgroundColor: 'rgba(0, 0, 0, 0.1)', // Even lighter backdrop
+        },
+      }}
+    >
+      <Fade in={openModal}>
+        <Box
+          sx={{
+            width: 400,
+            margin: '10% auto',
+            backgroundColor: 'white',
+            padding: '20px',
+            boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.2)', // Lighter shadow to make the modal prominent
+            borderRadius: '8px', // Rounded corners for the modal
+            outline: 'none', // Remove the default outline
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Withdraw Complaint
+          </Typography>
+          <TextField
+            fullWidth
+            label="Reason for Withdrawal"
+            variant="outlined"
+            value={withdrawReason}
+            onChange={(e) => setWithdrawReason(e.target.value)}
+            multiline
+            rows={4}
+          />
+          <Box mt={2} display="flex" justifyContent="space-between">
+            <Button onClick={() => setOpenModal(false)}>Cancel</Button>
+            <Button
+              color="primary"
+              onClick={handleWithdraw}
+            >
+              Submit
+            </Button>
           </Box>
-        </Fade>
-      </Modal>
-
+        </Box>
+      </Fade>
+    </Modal>
 
 
       {/* details */}
